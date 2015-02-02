@@ -21,7 +21,7 @@
   :mailto "guicho2.71828@gmail.com"
   :license "LLGPL"
   :depends-on (:alexandria :introspect-environment :optima
-                           :fare-quasiquote-optima)
+                           :fare-quasiquote-extras)
   :components ((:module "src"
                 :components
                 ((:file "package")

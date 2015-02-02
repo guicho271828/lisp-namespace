@@ -1,3 +1,81 @@
+
+Long time ago, in a galaxy far far away... 
+
+There used to be a civil war. Lisp
+aliens, striking from a function
+namespace, have fought for the
+design of their language against lisp-1.
+
+After the battle, some aliens managed
+to find an easy way to the lisper's
+moderate weapon, LISP-N, an
+not-so-developped idea with enough
+power to provide arbitrary number of namespaces.
+
+Pursued by the lot's of let+destructuring libraries,
+this small library provides ....
+well, this is enough. Not funny. Let's go to the example.
+
+#+BEGIN_SRC lisp
+(namespace-let ((#'x (y) (1+ y))
+                ((macro x) (y) (1+ y))
+                ((macro y) (y) (1+ y))
+                (#'x (y) (1+ y))
+                ((macro y) (y) (1+ y))
+                ((symbol-macro sm) 0)
+                (b 0))
+  (let ((b 1))
+    (print :x)))
+
+;; (PROGN
+;;  (FLET ((X (Y)
+;;           (1+ Y)))
+;;    (MACROLET ((X (Y)
+;;                 (1+ Y))
+;;               (Y (Y)
+;;                 (1+ Y)))
+;;      (FLET ((X (Y)
+;;               (1+ Y)))
+;;        (MACROLET ((Y (Y)
+;;                     (1+ Y)))
+;;          (SYMBOL-MACROLET ((SM 0))
+;;            (LET ((B 0))
+;;              (PROGN
+;;               (LET ((B 1))
+;;                 (PRINT :X))))))))))
+
+(namespace-let (((restart continue) (lambda (c) (declare (ignore c)) (print :hi!))))
+  (let ((b 1))
+    (print :x)))
+
+;; (PROGN
+;;  (RESTART-BIND ((CONTINUE (LAMBDA (C) (DECLARE (IGNORE C)) (PRINT :HI!))))
+;;    (PROGN
+;;     (LET ((B 1))
+;;       (PRINT :X)))))
+
+(define-namespace test fixnum)
+(setf (symbol-test 'a) 0)
+(print (symbol-test 'a))
+
+;; should be 1
+
+(funcall
+ (namespace-let (((test a) 1))
+   (lambda ()
+     (symbol-test 'a))))
+
+;; (FUNCALL
+;;  (PROGN
+;;    (LET ((#:TEMP1976 1))
+;;      (MACROLET ((SYMBOL-TEST (&WHOLE WHOLE X)
+;;                   (IF (EQUAL X ''A)
+;;                       '#:TEMP1976
+;;                       WHOLE)))
+;;        (PROGN (LAMBDA () (SYMBOL-TEST 'A)))))))
+
+#+END_SRC
+
 * Dependencies
 
 This library is at least tested on implementation listed below:

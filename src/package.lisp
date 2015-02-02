@@ -22,12 +22,18 @@ debugging purpose. I assume there won't be so many additional namespaces.
 
 (in-package :lispn)
 
-(defvar *namespaces* nil)
+(defvar *namespaces* (make-hash-table :test 'eq))
 
 (defun speed-required ()
   (< 2
      (second
       (assoc 'speed (declaration-information 'optimize)))))
+
+(defun namespace-p         (name) (symbolp name))
+(defun namespace-accessor  (name) (symbolicate "SYMBOL-" name))
+(defun namespace-hash      (name) (symbolicate "*" name "-TABLE*"))
+(defun namespace-condition (name) (symbolicate "UNBOUND-" name))
+(defun namespace-boundp    (name) (symbolicate name "-BOUNDP"))
 
 (defmacro define-namespace (name &optional (expected-type t))
   (when (member name '(function
@@ -38,42 +44,43 @@ debugging purpose. I assume there won't be so many additional namespaces.
                        value))
     (error "~a cannot be used as a namespace because it conflicts with the standard Common Lisp!"
            name))
-  (let ((accessor (symbolicate "SYMBOL-" name))
-        (hash (symbolicate "*" name "-TABLE*"))
-        (condition (symbolicate "UNBOUND-" name))
-        (boundp (symbolicate name "-BOUNDP")))
-    `(progn
-       (defvar ,hash (make-hash-table :test 'eq))
-       (define-condition ,condition (unbound-variable) ()
-         (:report (lambda (c s) (format s "Symbol ~a is unbound in namespace ~a"
-                                        (cell-error-name c) ',name))))
-       (declaim (ftype (function (symbol &optional (or null ,expected-type)) ,expected-type) ,accessor))
-       (defun ,accessor (symbol)
-         (multiple-value-bind (value found)
-             (gethash symbol ,hash)
-           (if found value
-               (error ',condition :name symbol))))
-       (defun ,boundp (symbol)
-         (nth-value 1 (gethash symbol ,hash)))
-       (declaim (ftype (function (,expected-type symbol) ,expected-type) (setf ,accessor)))
-       (defun (setf ,accessor) (new-value symbol)
-         ,@(if (speed-required)
-               nil
-               `((setf (get symbol 'name) new-value)))
-         (setf (gethash symbol ,hash) new-value))
-       ,@(when (speed-required)
-               `((declare (inline ,accessor))
-                 (declare (inline (setf ,accessor)))))
-       (pushnew ',name *namespaces*))))
+  (ematch name
+    ((namespace- accessor hash condition boundp)
+     `(progn
+        (defvar ,hash (make-hash-table :test 'eq))
+        (define-condition ,condition (unbound-variable) ()
+          (:report (lambda (c s) (format s "Symbol ~a is unbound in namespace ~a"
+                                         (cell-error-name c) ',name))))
+        (declaim (ftype (function (symbol) ,expected-type) ,accessor))
+        (defun ,accessor (symbol)
+          (multiple-value-bind (value found)
+              (gethash symbol ,hash)
+            (if found value
+                (error ',condition :name symbol))))
+        (defun ,boundp (symbol)
+          (nth-value 1 (gethash symbol ,hash)))
+        (declaim (ftype (function (,expected-type symbol) ,expected-type) (setf ,accessor)))
+        (defun (setf ,accessor) (new-value symbol)
+          ,@(if (speed-required)
+                nil
+                `((setf (get symbol 'name) new-value)))
+          (setf (gethash symbol ,hash) new-value))
+        ,@(when (speed-required)
+            `((declare (inline ,accessor))
+              (declare (inline (setf ,accessor)))))
+        (setf (gethash ',name *namespaces*) ',name)))))
 
 ;; (define-namespace menu function)
 
 (defun clear-namespace (name &optional check-error)
   (when check-error
-    (assert (member name *namespaces*)))
-  (removef *namespaces* name)
+    (assert (gethash name *namespaces*)))
+  (remhash name *namespaces*)
   (setf (symbol-value (symbolicate "*" name "-TABLE*"))
         (make-hash-table :test 'eq))
   name)
 
+
+(defun bindingp (namespace-name)
+  (gethash namespace-name *namespaces*))
 
