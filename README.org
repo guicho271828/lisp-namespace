@@ -1,5 +1,5 @@
 
-#+BEGIN_QUOTE
+#+BEGIN_SRC
 Long time ago, in a galaxy far far away... 
 
 There used to be a civil war. Lisp
@@ -15,7 +15,7 @@ power to provide arbitrary number of namespaces.
 
 Pursued by the lot's of let+destructuring libraries,
 this small library provides ....
-#+END_QUOTE
+#+END_SRC
 
 Well, this would be enough. Flat joke. Let's go to the example.
 
