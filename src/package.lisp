@@ -14,12 +14,13 @@ debugging purpose. I assume there won't be so many additional namespaces.
 
 |#
 
-(defpackage :lisp-n
-  (:use :cl :alexandria :introspect-environment)
+(defpackage :lisp-namespace
+  (:use :cl :alexandria :introspect-environment :optima)
+  (:nicknames :lispn)
   (:export :define-namespace
            :clear-namespace))
 
-(in-package :lisp-n)
+(in-package :lispn)
 
 (defvar *namespaces* nil)
 
@@ -75,4 +76,4 @@ debugging purpose. I assume there won't be so many additional namespaces.
         (make-hash-table :test 'eq))
   name)
 
-;; TODO namespace-let
+

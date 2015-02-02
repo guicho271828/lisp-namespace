@@ -20,9 +20,11 @@
   :author "Masataro Asai"
   :mailto "guicho2.71828@gmail.com"
   :license "LLGPL"
-  :depends-on (:alexandria :introspect-environment)
+  :depends-on (:alexandria :introspect-environment :optima
+                           :fare-quasiquote-optima)
   :components ((:module "src"
                 :components
-                ((:file "namespace"))))
+                ((:file "package")
+                 (:file "namespace-let"))))
   :description ""
   :in-order-to ((test-op (load-op lisp-namespace.test))))
