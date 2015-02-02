@@ -1,0 +1,17 @@
+* Dependencies
+
+This library is at least tested on implementation listed below:
+
++ SBCL 1.2.8 on X86 Linux 3.13.0-44-generic (author's environment)
+
+Also, it depends on the following libraries:
+
++ alexandria by ** :
+    Alexandria is a collection of portable public domain utilities.
++ introspect-environment by *Bike* :
+
+* Author & Copyright
+
+Copyright (c) 2015 Masataro Asai (guicho2.71828@gmail.com)
+
+Licensed under the LLGPL License.
