@@ -1,8 +1,9 @@
 
+#+BEGIN_QUOTE
 Long time ago, in a galaxy far far away... 
 
 There used to be a civil war. Lisp
-aliens, striking from a function
+aliens, striking from the function
 namespace, have fought for the
 design of their language against lisp-1.
 
@@ -14,7 +15,9 @@ power to provide arbitrary number of namespaces.
 
 Pursued by the lot's of let+destructuring libraries,
 this small library provides ....
-well, this is enough. Not funny. Let's go to the example.
+#+END_QUOTE
+
+Well, this would be enough. Flat joke. Let's go to the example.
 
 #+BEGIN_SRC lisp
 (namespace-let ((#'x (y) (1+ y))
