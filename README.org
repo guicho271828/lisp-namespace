@@ -21,8 +21,8 @@ Well, this would be enough. Flat joke.
 
 * Introduction
 
-There are several libraries for extending the semantics of =let=,
-e.g. [[http://quickdocs.org/metabang-bind/][metabang-bind]], [[http://quickdocs.org/let-plus/][let-plus]], [[http://quickdocs.org/x.let-star/][x.let-star]] . However, destructuring is merely
+There are several libraries for extending the semantics of =let=.
+However, destructuring is merely
 a syntax sugar for writing the accessor. Moreover, it is now considered
 obsolete: it is superseded by pattern-matching many years ago, which
 cleanly combines =cond=, =typecase= and destructuring.
