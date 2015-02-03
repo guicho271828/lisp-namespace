@@ -35,6 +35,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
 (defun namespace-hash      (name) (symbolicate "*" name "-TABLE*"))
 (defun namespace-condition (name) (symbolicate "UNBOUND-" name))
 (defun namespace-boundp    (name) (symbolicate name "-BOUNDP"))
+(defun namespace-letname   (name) (symbolicate name "-LET"))
 
 (defmacro define-namespace (name &optional (expected-type t))
   (when (member name '(function
@@ -46,7 +47,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
     (error "~a cannot be used as a namespace because it conflicts with the standard Common Lisp!"
            name))
   (ematch name
-    ((namespace- accessor hash condition boundp)
+    ((namespace- accessor hash condition boundp letname)
      `(progn
         (defvar ,hash (make-hash-table :test 'eq))
         (define-condition ,condition (unbound-variable) ()
@@ -69,6 +70,11 @@ debugging purpose. I assume there won't be so many additional namespaces.
         ,@(when (speed-required)
             `((declare (inline ,accessor))
               (declare (inline (setf ,accessor)))))
+        (defmacro ,letname (bindings &body body)
+          `(namespace-let
+               ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
+                        bindings)
+             ,@body))
         (setf (gethash ',name *namespaces*) ',name)))))
 
 ;; (define-namespace menu function)
@@ -85,3 +91,11 @@ debugging purpose. I assume there won't be so many additional namespaces.
 (defun bindingp (namespace-name)
   (gethash namespace-name *namespaces*))
 
+
+;; (with-gensyms (temp)
+;;   `(let ((,temp ,@definition))
+;;      (macrolet ((,accessor (&whole whole x)
+;;                   (if (equal x '(quote ,name))
+;;                       ',temp
+;;                       whole)))
+;;        ,@body)))

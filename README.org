@@ -93,6 +93,14 @@ Well, this would be enough. Flat joke. Let's go to the example.
 
 (symbol-test 'a) ; --> 0
 
+;; flet-style: binding constructs specialized to that namespace
+(let (x)
+    (test-let ((a 1))
+      (setf x 
+            (lambda ()
+              (symbol-test 'a))))
+    (is (= 1 (funcall x))))
+
 #+END_SRC
 
 * Idea

@@ -72,6 +72,13 @@
       (setf x 
             (lambda ()
               (symbol-test 'a))))
+    (is (= 1 (funcall x))))
+  ;; lexical, specialized
+  (let (x)
+    (test-let ((a 1))
+      (setf x 
+            (lambda ()
+              (symbol-test 'a))))
     (is (= 1 (funcall x)))))
 
 (5am:run! :lisp-namespace)
