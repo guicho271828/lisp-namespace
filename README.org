@@ -97,21 +97,25 @@ Well, this would be enough. Flat joke. Let's go to the example.
 
 * Idea
 
-Destructuring is obsolete. It is superseded by pattern-matching,
-which cleanly combines =cond=, =typecase= and destructuring.
+Destructuring is obsolete: it is superseded by pattern-matching.
+Pattern-matching cleanly combines =cond=, =typecase= and destructuring.
+In contrast, *destructuring is a binding construct* and therefore
+*not orthogonal to* =let=, which is also a binding construct.
 
-Destructuring is one form of binding. It is a binding construct.
-I want to stress it out. *Destructuring is a binding construct.* Therefore
-*it is not orthogonal from* =let=, which is also a binding construct.
+There are several libraries for extending the semantics of =let=,
+e.g. [[http://quickdocs.org/metabang-bind/][metabang-bind]], [[http://quickdocs.org/let-plus/][let-plus]], [[http://quickdocs.org/x.let-star/][x.let-star]] . IMAO, none of which are cool nor
+thoroughly designed because of this redunduncy. They are not a smart
+integration of different ideas into a new horizon, or they are subject to a
+variation of greenspun's rule: they are the /ad hoc, informally-specified,
+bug-ridden, slow implementation of half of pattern-matching in ML/. (And I
+favor [[https://github.com/m2ym/optima][optima]] in this sense.)  There should be another way around. What
+could be *the other* orthogonal aspect that could be combined with =let=,
+or, =let + cond = pattern-match= ?
 
-I personally feel combining =let= and =destructuring= is NOT cool because
-it contains this kind of redunduncy. It is not a smart integration of
-different ideas into a new horizon, while pattern-matching is.
-
-There should be another way around. I noticed an oddness in flet, macrolet,
-labels, let, symbol-macrolet. Namespace can be trivially implemented with a
-hash table, but the lexical binding would be something that's been missed I
-guess.  That's what this library is for.
+Then I noticed an oddness in flet, macrolet, labels, let,
+symbol-macrolet. Namespace can be trivially implemented with a hash table,
+but the lexical binding is not --- it's worth a library.
+That's what this library is for.
 
 * I'm Asking for Help
 
