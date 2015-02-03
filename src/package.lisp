@@ -18,7 +18,8 @@ debugging purpose. I assume there won't be so many additional namespaces.
   (:use :cl :alexandria :introspect-environment :optima)
   (:nicknames :lispn)
   (:export :define-namespace
-           :clear-namespace))
+           :clear-namespace
+           :namespace-let))
 
 (in-package :lispn)
 

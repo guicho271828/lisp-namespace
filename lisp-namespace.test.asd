@@ -13,9 +13,9 @@
 (defsystem lisp-namespace.test
   :author "Masataro Asai"
   :license "LLGPL"
-  :depends-on (:lisp-namespace
-               :fiveam)
+  :defsystem-depends-on (:fiveam)
+  :depends-on (:lisp-namespace)
   :components ((:module "t"
                 :components
-                ((:file "package"))))
-  :perform (load-op :after (op c) ))
+                ((:file "package"))
+                :serial t)))
