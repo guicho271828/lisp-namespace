@@ -44,7 +44,7 @@
        (let ((b 1))
          (print :x)))))
 
-(test complicated
+(test restart
   (finishes
     (namespace-let (((restart continue)
                      (lambda (c)
@@ -79,6 +79,15 @@
       (setf x 
             (lambda ()
               (symbol-test 'a))))
-    (is (= 1 (funcall x)))))
+    (is (= 1 (funcall x))))
+
+  ;; nested
+  (let (x y)
+    (test-let ((a 1))
+      (setf x (lambda () (symbol-test 'a)))
+      (test-let ((a 2))
+        (setf y (lambda () (symbol-test 'a)))))
+    (is (= 1 (funcall x)))
+    (is (= 2 (funcall y)))))
 
 (5am:run! :lisp-namespace)
