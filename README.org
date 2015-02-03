@@ -98,7 +98,7 @@ DEFINE-NAMESPACE defines 4 functions/macros, and a hash table:
 In general, it should be avoided to define a namespace for something that
 actually overlaps with the other in its idea. For example, consider
 defining a namespace for a function defined by =defcached= in
-=function-cache=.  As is implemented in =function-cache=, the cache object
+[[https://github.com/AccelerationNet/function-cache][function-cache]].  As is implemented in =defcached=, the cache object
 is worth a namespace, but the function itself should be in the
 function namespace (of course), and *not* in a separate namespace.
 
