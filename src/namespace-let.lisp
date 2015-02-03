@@ -60,5 +60,54 @@
                             whole)))
              ,@body)))))))
 
+;; lexical nickname for packages : abondoned
+
+#+nil
+(defun %bind-package (def body rest-bindings)
+  ;;  This one is special. All symbols are interned in the current package at
+  ;; the read time, but this binder parse them again, then intern in the
+  ;; target package.
+  ;;  Also, it runs in compile-time, not in runtime. Therefore, the target
+  ;; package should also exist in compile-time.
+  (assert (find-package def) nil
+          "The specified package ~a should exist in compilation time!" def)
+  (let ((pkg (find-package def)))
+    (%pickone
+     rest-bindings
+     (maptree (lambda (s)
+                (match s
+                  ((symbol name)
+                   (intern name pkg))
+                  (_ s)))
+              body))))
+
+#+nil
+(defun maptree (fn tree)
+  (match tree
+    ((cons car cdr)
+     (cons (maptree fn car)
+           (maptree fn cdr)))
+    ((type array)
+     (let ((a (copy-array tree)))
+       (dotimes (i (array-total-size a) a)
+         (setf (row-major-aref a i)
+               (funcall fn (row-major-aref tree i))))))
+    (_ (funcall fn tree))))
+
+#+nil
+(maptree #'print '(let (x y)
+                   (test-let ((a 1))
+                     (setf x (lambda () (symbol-test 'a)))
+                     (test-let ((a 2))
+                       (setf y (lambda () (symbol-test 'a)))))
+                   (is (= 1 (funcall x)))
+                   (is (= 2 (funcall y)))))
+#+nil
+(maptree #'print #(a b c d e))
+#+nil
+(maptree #'print #2a((a b c d e)))
+#+nil
+(read-from-string "`(a ,b)")
+
 (named-readtables:in-readtable nil)
 
