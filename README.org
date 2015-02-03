@@ -10,7 +10,7 @@ design of their language against lisp-1.
 After the battle, some aliens managed
 to find an easy way to the lisper's
 moderate weapon, LISP-N, an
-not-so-developped idea with enough
+not-so-developed idea with enough
 power to provide arbitrary number of namespaces.
 
 Pursued by the lot's of let+destructuring libraries,
@@ -48,7 +48,7 @@ namespace and /value/ namespace, but there are actually more ---  there are
 also /class/ namespace and /package/ namespace. Same
 symbol can represent different objects in each namespace. For example, all
 these below can coexist in a same file without errors, and each object is
-acccessible with the corresponding function.
+accessible with the corresponding function.
 
 #+BEGIN_SRC lisp
 (in-package :cl-user)
@@ -133,7 +133,7 @@ Example:
 ;;               (LET ((B 1))
 ;;                 (PRINT :X))))))))))
 
-;; (restart name), (handler name) expands into restart/hander-bind
+;; (restart name), (handler name) expands into restart/handler-bind
 (namespace-let (((restart continue)
                  (lambda (c)
                    (declare (ignore c))
@@ -198,9 +198,10 @@ self-expressive --- =let+= does not describe how it's different from the
 original =let=.  =bind= and =where= are not considered good either, due to the
 similar reason.
 
-Simply, =nlet=? Or, make it =let= and force the user to shadow =cl:let=?
-(nah I don't like it.)
-Hope there'd be a crazy bright idea.
+Simply, =nlet=? (@masatoi0 has kindly gave me an advice: =nslet= is better
+to avoid confusion with the abbreviation of =named-let=.) Or, make it =let=
+and force the user to shadow =cl:let=?  (nah I don't like it.)  Hope
+there'd be a crazy bright idea.
 
 * Dependencies
 
