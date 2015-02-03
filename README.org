@@ -21,25 +21,22 @@ Well, this would be enough. Flat joke.
 
 * Introduction
 
-Destructuring is obsolete: it is superseded by pattern-matching.
-Pattern-matching cleanly combines =cond=, =typecase= and destructuring.
-In contrast, *destructuring is a binding construct* and therefore
-*not orthogonal to* =let=, which is also a binding construct.
-
 There are several libraries for extending the semantics of =let=,
-e.g. [[http://quickdocs.org/metabang-bind/][metabang-bind]], [[http://quickdocs.org/let-plus/][let-plus]], [[http://quickdocs.org/x.let-star/][x.let-star]] . IMAO, none of which are cool nor
-thoroughly designed because of this redunduncy. They are not a smart
-integration of different ideas into a new horizon, or they are subject to a
-variation of greenspun's rule: they are the /ad hoc, informally-specified,
-bug-ridden, slow implementation of half of pattern-matching in ML/. (And I
-favor [[https://github.com/m2ym/optima][optima]] in this sense.)  There should be another way around. What
-could be *the other* orthogonal aspect that could be combined with =let=,
-or, =let + cond = pattern-match= ?
+e.g. [[http://quickdocs.org/metabang-bind/][metabang-bind]], [[http://quickdocs.org/let-plus/][let-plus]], [[http://quickdocs.org/x.let-star/][x.let-star]] . However, destructuring is merely
+a syntax sugar for writing the accessor. Moreover, it is now considered
+obsolete: it is superseded by pattern-matching many years ago, which
+cleanly combines =cond=, =typecase= and destructuring.
+
+Those =let= extensions are subject to a variation of greenspun's rule: they
+are the /ad hoc, informally-specified, bug-ridden, slow implementation of
+half of pattern-matching in ML/. (And I favor [[https://github.com/m2ym/optima][optima]] in this sense.) Now it
+comes to my mind: what could be *the other* orthogonal aspect
+that could be combined with =let=, or, =let + cond = pattern matching= ?
 
 Then I noticed an oddness in flet, macrolet, labels, let,
-symbol-macrolet. Namespace can be trivially implemented with a hash table,
-but the lexical binding is not --- it's worth a library.
-This is what this library is for.
+symbol-macrolet. Special bindings for namespaces can be trivially
+implemented with a hash table, but the lexical binding is not --- it's
+worth a library.  This is what this library is for.
 
 * Macro (DEFINE-NAMESPACE NAME &optional EXPECTED-TYPE)
 
