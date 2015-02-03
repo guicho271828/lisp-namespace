@@ -40,16 +40,18 @@ worth a library.  This is what this library is for.
 
 * Macro (DEFINE-NAMESPACE NAME &optional EXPECTED-TYPE)
 
-This macro defines a /namespace/. By /namespace/ it does not mean
-a /package/, which is a way to manage symbols. /Namespace/ is *orthogonal*
-to packages --- since CL already has 2 or more namespaces, e.g., /function/
-namespace, /value/ namespace and /class/ namespace, /package/ namespace. Same
+This macro defines a /namespace/. By /namespace/ I don't mean a /package/,
+which is a way to manage symbols and orthogonal to /namespace/.
+
+CL already has 2 or more namespaces, e.g., /function/
+namespace, /value/ namespace, /class/ namespace and /package/ namespace. Same
 symbol can represent different objects in each namespace. For example, all
-these below can coexist in a same file without error, and each object is
-acccessible with corresponding function.
+these below can coexist in a same file without errors, and each object is
+acccessible with the corresponding function.
 
 #+BEGIN_SRC lisp
 (in-package :cl-user)
+
 (defclass foo () ())
 (defun foo () nil)
 (defvar foo 1)
@@ -73,6 +75,12 @@ acccessible with corresponding function.
 | function  | symbol-function | UNDEFINED-FUNCTION | fboundp | flet,labels |
 | package   | find-package    | PACKAGE-ERROR      | n/a     | n/a         |
 
+/Some/ namespaces overlaps with each other. For example:
+
++ /type/ namespace in CL can be said to overlap with /class/, /condition/ and /struct/ namespace
++ /function/ namspace with /macro-function/ and /generic-function/ namespace
++ /value/ namespace with /symbol-macro/ namespace.
+
 For the given name X of namespace , DEFINE-NAMESPACE defines 4 functions/macros, and
 a hash table:
 
@@ -81,6 +89,13 @@ a hash table:
 + =#'x-boundp= : boolean
 + condition =UNBOUND-X=
 + macro =(X-LET (binding...) body)= : binding
+
+It is /wrong/ to define a namespace for something that actually overlaps in
+its idea. For example, consider defining a namespace for a function defined
+by =defcached= in =function-cache=. 
+As is implemented in =function-cache=,
+the cache object is worth a namespace,
+but the function itself should be in the function namespace.
 
 * Macro NAMESPACE-LET
 
