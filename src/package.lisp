@@ -91,11 +91,3 @@ debugging purpose. I assume there won't be so many additional namespaces.
 (defun bindingp (namespace-name)
   (gethash namespace-name *namespaces*))
 
-
-;; (with-gensyms (temp)
-;;   `(let ((,temp ,@definition))
-;;      (macrolet ((,accessor (&whole whole x)
-;;                   (if (equal x '(quote ,name))
-;;                       ',temp
-;;                       whole)))
-;;        ,@body)))
