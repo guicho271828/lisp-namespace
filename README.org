@@ -21,10 +21,14 @@ Well, this would be enough. Flat joke.
 
 * Introduction
 
-There are several libraries for extending the semantics of =let=.
-However, destructuring is merely
-a syntax sugar for writing the accessor. Moreover, it is now considered
-obsolete: it is superseded by pattern-matching many years ago, which
+# However, destructuring is merely
+# a syntax sugar for writing the accessor.
+
+There are several libraries for extending =let=.
+Most of them goes toward destructuring, e.g., allowing
+=&some-fancy-directive= in the argument list.
+However, destructuring is now considered
+obsolete: it is superseded by pattern-matching, which
 cleanly combines =cond=, =typecase= and destructuring.
 
 Those =let= extensions are subject to a variation of greenspun's rule: they
@@ -82,8 +86,8 @@ corresponding function.
 
 : (define-namespace name &optional expected-type)
 
-This macro defines a namespace. For the given name X of namespace ,
-DEFINE-NAMESPACE defines 4 functions/macros, and a hash table:
+This macro defines a namespace. For the given name of namespace X,
+DEFINE-NAMESPACE defines 4 functions/macros, and an internal hash table:
 
 + =*X-TABLE*= : hashtable
 + =#'symbol-x, #'(setf symbol-x)= : accessor
@@ -97,6 +101,8 @@ defining a namespace for a function defined by =defcached= in
 [[https://github.com/AccelerationNet/function-cache][function-cache]].  As is implemented in =defcached=, the cache object
 is worth a namespace, but the function itself should be in the
 function namespace (of course), and *not* in a separate namespace.
+
+Note that /namespace/ itself has its own namespace.
 
 Examples are in [[EXAMPLE.org]] .
 
