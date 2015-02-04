@@ -86,4 +86,4 @@ debugging purpose. I assume there won't be so many additional namespaces.
         (make-hash-table :test 'eq))
   name)
 
-(define-namespace namespace)
+(define-namespace namespace symbol)
