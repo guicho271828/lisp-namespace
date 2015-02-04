@@ -2,7 +2,7 @@
 #+BEGIN_SRC
 Long time ago, in a galaxy far far away... 
 
-It is a period of a civil war. Lisp
+It is a period of a civil war. Lisp-2
 aliens, striking from the function
 namespace, have fought for the
 design of their language against lisp-1.
