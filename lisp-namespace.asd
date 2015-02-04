@@ -25,6 +25,7 @@
   :components ((:module "src"
                 :components
                 ((:file "package")
-                 (:file "namespace-let"))))
+                 (:file "namespace-let"))
+                :serial t))
   :description ""
   :in-order-to ((test-op (load-op lisp-namespace.test))))

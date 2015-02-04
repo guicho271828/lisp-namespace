@@ -23,19 +23,20 @@ debugging purpose. I assume there won't be so many additional namespaces.
 
 (in-package :lispn)
 
-(defvar *namespaces* (make-hash-table :test 'eq))
-
-(defun speed-required ()
-  (< 2
-     (second
-      (assoc 'speed (declaration-information 'optimize)))))
-
-(defun namespace-p         (name) (symbolp name))
-(defun namespace-accessor  (name) (symbolicate "SYMBOL-" name))
-(defun namespace-hash      (name) (symbolicate "*" name "-TABLE*"))
-(defun namespace-condition (name) (symbolicate "UNBOUND-" name))
-(defun namespace-boundp    (name) (symbolicate name "-BOUNDP"))
-(defun namespace-letname   (name) (symbolicate name "-LET"))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  ;; the name of this variable shoud not be changed, to maintain consistency
+  ;; to the hash tables defined by define-namespace.
+  (defvar *namespace-hash* (make-hash-table :test 'eq))
+  (defun speed-required ()
+    (< 2
+       (second
+        (assoc 'speed (declaration-information 'optimize)))))
+  (defun %namespace-p         (name) (symbolp name))
+  (defun %namespace-accessor  (name) (symbolicate "SYMBOL-" name))
+  (defun %namespace-hash      (name) (symbolicate "*" name "-TABLE*"))
+  (defun %namespace-condition (name) (symbolicate "UNBOUND-" name))
+  (defun %namespace-boundp    (name) (symbolicate name "-BOUNDP"))
+  (defun %namespace-letname   (name) (symbolicate name "-LET")))
 
 (defmacro define-namespace (name &optional (expected-type t))
   (when (member name '(function
@@ -47,7 +48,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
     (error "~a cannot be used as a namespace because it conflicts with the standard Common Lisp!"
            name))
   (ematch name
-    ((namespace- accessor hash condition boundp letname)
+    ((%namespace- accessor hash condition boundp letname)
      `(progn
         (defvar ,hash (make-hash-table :test 'eq))
         (define-condition ,condition (unbound-variable) ()
@@ -75,19 +76,14 @@ debugging purpose. I assume there won't be so many additional namespaces.
                ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
                         bindings)
              ,@body))
-        (setf (gethash ',name *namespaces*) ',name)))))
-
-;; (define-namespace menu function)
+        (setf (gethash ',name *namespace-table*) ',name)))))
 
 (defun clear-namespace (name &optional check-error)
   (when check-error
     (assert (gethash name *namespaces*)))
-  (remhash name *namespaces*)
-  (setf (symbol-value (symbolicate "*" name "-TABLE*"))
+  (remhash name *namespace-table*)
+  (setf (symbol-value (%namespace-table name))
         (make-hash-table :test 'eq))
   name)
 
-
-(defun bindingp (namespace-name)
-  (gethash namespace-name *namespaces*))
-
+(define-namespace namespace)

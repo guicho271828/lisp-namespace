@@ -36,7 +36,7 @@
     (`(((restart ,name) ,@definition) ,@rest)
       (%merge 'restart-bind name definition body rest))
     ;; namespace binding
-    (`(((,(and namespace (binding)) ,name) ,@definition) ,@rest)
+    (`(((,(and namespace (namespace-bound)) ,name) ,@definition) ,@rest)
       (%pickone rest (%wrap namespace name definition body)))
     (`() `(progn ,@body))))
 
@@ -50,8 +50,8 @@
       `((,kind ((,name ,@def)) ,@body))))))
 
 (defun %wrap (namespace name definition body)
-  (ematch namespace
-    ((namespace- accessor)
+  (ematch (symbol-namespace namespace)
+    ((%namespace- accessor)
      (with-gensyms (temp)
        `((let ((,temp ,@definition))
            (macrolet ((,accessor (&whole whole x)
