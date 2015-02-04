@@ -41,11 +41,11 @@ worth a library.  This is what this library is for.
 * Namespaces in CL
 
 By /namespace/ I don't mean a /package/,
-which is a way to manage symbols and orthogonal to /namespace/.
+which is a way to manage symbols. It is orthogonal to /namespace/.
 
 CL already has major 2 namespaces, /function/ namespace and /value/
 namespace, but there are actually more --- e.g., there are also /class/
-namespace and /package/ namespace. Same symbol can represent different
+namespace. Same symbol can represent different
 objects in each namespace. For example, all these below can coexist in a
 same file without errors, and each object is accessible with the
 corresponding function.
@@ -56,29 +56,25 @@ corresponding function.
 (defclass foo () ())
 (defun foo () nil)
 (defvar foo 1)
-(defpackage foo)
 
 (find-class 'foo)      ; -> #<STANDARD-CLASS FOO>
-(symbol-value 'foo)    ; -> 1
 (symbol-function 'foo) ; -> #<FUNCTION FOO>
-(find-package "FOO")  ; -> #<PACKAGE "FOO">
+(symbol-value 'foo)    ; -> 1
 
 (make-instance 'bar)   ; -> SIMPLE-ERROR
-(symbol-value 'bar)    ; -> UNBOUND-VARIABLE
 (symbol-function 'bar) ; -> UNDEFINED-FUNCTION
-(bar:x)                ; -> PACKAGE-ERROR
+(symbol-value 'bar)    ; -> UNBOUND-VARIABLE
 #+END_SRC
 
 | namespace | accessor        | unbound condition  | boundp  | binding     |
 |-----------+-----------------+--------------------+---------+-------------|
 | class     | find-class      | SIMPLE-ERROR       | n/a     | n/a         |
-| value     | symbol-value    | UNBOUND-VARIABLE   | boundp  | let         |
 | function  | symbol-function | UNDEFINED-FUNCTION | fboundp | flet,labels |
-| package   | find-package    | PACKAGE-ERROR      | n/a     | n/a         |
+| value     | symbol-value    | UNBOUND-VARIABLE   | boundp  | let         |
 
 /Some/ namespaces in CL can be said to overlap with each other. For example:
 
-+ *type* namespace --- with *class*, *condition* and *struct* namespace
++ *class* namespace --- with *type*, *condition* and *struct* namespace
 + *function* namspace --- with *macro-function* and *generic-function* namespace
 + *value* namespace --- with *symbol-macro* namespace.
 
