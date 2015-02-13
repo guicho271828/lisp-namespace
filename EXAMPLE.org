@@ -25,20 +25,31 @@
             (symbol-test 'a))))
   (is (= 1 (funcall x))))
 
+;; Expands into:
+;; (PROGN
+;;  (LET ((#:TEMP1953 1))
+;;    (DECLARE (TYPE (TEST-TYPE) #:TEMP1953))
+;;    (MACROLET ((SYMBOL-TEST (&WHOLE LISP-NAMESPACE::WHOLE LISP-NAMESPACE::X)
+;;                 (IF (EQUAL LISP-NAMESPACE::X ''A)
+;;                     '#:TEMP1953
+;;                     LISP-NAMESPACE::WHOLE)))
+;;      (PROGN (SETF X (LAMBDA () (SYMBOL-TEST 'A)))))))
+;; note that the argument should be lexically identifiable.
+
 (symbol-test 'a) ; --> 0
 
 #+END_SRC
 
-* NAMESPACE-LET
+* NAMESPACE-LET / NSLET
 
 #+BEGIN_SRC lisp
-(namespace-let ((#'x (y) (1+ y))
-                ((macro x) (y) (1+ y))
-                ((macro y) (y) (1+ y))
-                (#'x (y) (1+ y))
-                ((label y) (y) (y y))
-                ((symbol-macro sm) 0)
-                (b 0))
+(nslet ((#'x (y) (1+ y))
+        ((macro x) (y) (1+ y))
+        ((macro y) (y) (1+ y))
+        (#'x (y) (1+ y))
+        ((label y) (y) (y y))
+        ((symbol-macro sm) 0)
+        (b 0))
   (let ((b 1))
     (print :x)))
 
