@@ -19,7 +19,8 @@ debugging purpose. I assume there won't be so many additional namespaces.
   (:nicknames :lispn)
   (:export :define-namespace
            :clear-namespace
-           :namespace-let))
+           :namespace-let
+           :nslet))
 
 (in-package :lispn)
 

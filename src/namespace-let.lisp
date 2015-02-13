@@ -14,6 +14,9 @@
 (defmacro namespace-let (bindings &body body)
   (%pickone (reverse bindings) `((progn ,@body))))
 
+(setf (macro-function 'nslet)
+      (macro-function 'namespace-let))
+
 ;; mutual recursion
 
 (defun %pickone (bindings body)
@@ -108,6 +111,4 @@
 (maptree #'print #2a((a b c d e)))
 #+nil
 (read-from-string "`(a ,b)")
-
-(named-readtables:in-readtable nil)
 
