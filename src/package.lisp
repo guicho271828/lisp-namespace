@@ -38,7 +38,9 @@ debugging purpose. I assume there won't be so many additional namespaces.
   (defun %namespace-boundp    (name) (symbolicate name "-BOUNDP"))
   (defun %namespace-letname   (name) (symbolicate name "-LET")))
 
-(defmacro define-namespace (name &optional (expected-type t))
+(defmacro define-namespace (name &optional
+                                   (expected-type t)
+                                   (binding t))
   (when (member name '(function
                        macrolet
                        name
@@ -71,11 +73,12 @@ debugging purpose. I assume there won't be so many additional namespaces.
         ,@(when (speed-required)
             `((declare (inline ,accessor))
               (declare (inline (setf ,accessor)))))
-        (defmacro ,letname (bindings &body body)
+        ,(when binding
+           `(defmacro ,letname (bindings &body body)
           `(namespace-let
                ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
                         bindings)
-             ,@body))
+                 ,@body)))
         (setf (gethash ',name *namespace-table*) ',name)))))
 
 (defun clear-namespace (name &optional check-error)
@@ -86,4 +89,4 @@ debugging purpose. I assume there won't be so many additional namespaces.
         (make-hash-table :test 'eq))
   name)
 
-(define-namespace namespace symbol)
+(define-namespace namespace symbol nil)
