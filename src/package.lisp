@@ -37,6 +37,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
   (defun %namespace-hash      (name) (symbolicate "*" name "-TABLE*"))
   (defun %namespace-condition (name) (symbolicate "UNBOUND-" name))
   (defun %namespace-boundp    (name) (symbolicate name "-BOUNDP"))
+  (defun %namespace-type      (name) (symbolicate name "-TYPE"))
   (defun %namespace-letname   (name) (symbolicate name "-LET")))
 
 (defmacro define-namespace (name &optional
@@ -51,13 +52,14 @@ debugging purpose. I assume there won't be so many additional namespaces.
     (error "~a cannot be used as a namespace because it conflicts with the standard Common Lisp!"
            name))
   (ematch name
-    ((%namespace- accessor hash condition boundp letname)
+    ((%namespace- accessor hash condition boundp letname type)
      `(eval-when (:compile-toplevel :load-toplevel :execute)
         (defvar ,hash (make-hash-table :test 'eq))
         (define-condition ,condition (unbound-variable) ()
           (:report (lambda (c s) (format s "Symbol ~a is unbound in namespace ~a"
                                          (cell-error-name c) ',name))))
-        (declaim (ftype (function (symbol) ,expected-type) ,accessor))
+        (deftype ,type () ',expected-type)
+        (declaim (ftype (function (symbol) (,type)) ,accessor))
         (defun ,accessor (symbol)
           (multiple-value-bind (value found)
               (gethash symbol ,hash)
@@ -65,7 +67,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
                 (error ',condition :name symbol))))
         (defun ,boundp (symbol)
           (nth-value 1 (gethash symbol ,hash)))
-        (declaim (ftype (function (,expected-type symbol) ,expected-type) (setf ,accessor)))
+        (declaim (ftype (function ((,type) symbol) (,type)) (setf ,accessor)))
         (defun (setf ,accessor) (new-value symbol)
           ,@(if (speed-required)
                 nil
@@ -76,9 +78,9 @@ debugging purpose. I assume there won't be so many additional namespaces.
               (declare (inline (setf ,accessor)))))
         ,(when binding
            `(defmacro ,letname (bindings &body body)
-          `(namespace-let
-               ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
-                        bindings)
+              `(namespace-let
+                   ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
+                            bindings)
                  ,@body)))
         (setf (gethash ',name *namespace-table*) ',name)))))
 

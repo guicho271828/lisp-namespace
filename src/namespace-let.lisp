@@ -54,9 +54,10 @@
 
 (defun %wrap (namespace name definition body)
   (ematch (symbol-namespace namespace)
-    ((%namespace- accessor)
+    ((%namespace- accessor type)
      (with-gensyms (temp)
        `((let ((,temp ,@definition))
+           (declare (type (,type) ,temp))
            (macrolet ((,accessor (&whole whole x)
                         (if (equal x '(quote ,name))
                             ',temp

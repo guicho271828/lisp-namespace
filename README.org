@@ -154,8 +154,8 @@ crazy bright idea.
 
 Here are the remaining TODOs:
 
-+ There is no type declaration for the local binding.
-+ X-let does not recognize =(declare (special ...))= currently.
++ [X] There is no type declaration for the local binding.
++ [ ] X-let does not recognize =(declare (special ...))= currently.
 
 * Dependencies
 
