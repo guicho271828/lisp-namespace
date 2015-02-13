@@ -163,6 +163,11 @@ Also, it depends on the following libraries:
     Alexandria is a collection of portable public domain utilities.
 + introspect-environment by *Bike* :
 
+* TODOs
+
++ local binding should hold a type declaration.
++ X-let does not allow =(declare (special ...))= currently.
+
 * Author & Copyright
 
 Copyright (c) 2015 Masataro Asai (guicho2.71828@gmail.com)
