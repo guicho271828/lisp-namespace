@@ -90,4 +90,3 @@
     (is (= 1 (funcall x)))
     (is (= 2 (funcall y)))))
 
-(5am:run! :lisp-namespace)
