@@ -104,7 +104,7 @@ Examples are in [[EXAMPLE.org]] .
 
 =LET= with ability to lexically bind any value in the namespace.
 It currently supports /function, labels, value, symbol-macro, macrolet,
-restart, handler/ namespaces and the user-defined namespaces.
+restart, handler/ [2] namespaces and the user-defined namespaces.
 
 Full examples are in [[EXAMPLE.org]] .
 
@@ -132,6 +132,7 @@ Full examples are in [[EXAMPLE.org]] .
 ;;                 (PRINT :X))))))))))
 #+END_SRC
 
+[2] restarts and handlers have the dynamic scope only.
 
 ** Package LISP-NAMESPACE
 
@@ -146,7 +147,7 @@ self-expressive --- =let+= does not describe how it's different from the
 original =let=.  =bind= and =where= are not considered good either, due to the
 similar reason.
 
-I have adopted =nslet=, thanks to masatoi0@twitter's
+I adopted =nslet=, thanks to masatoi0@twitter's
 advice. However, there is another alternative: Make it =let= and force the
 user to shadow =cl:let=?  (nah I don't like it.)  I'm still searching for a
 crazy bright idea.
