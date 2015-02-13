@@ -72,7 +72,7 @@ corresponding function.
 + *function* namspace --- with *macro-function* and *generic-function* namespace
 + *value* namespace --- with *symbol-macro* namespace.
 
-* Macro DEFINE-NAMESPACE
+** Macro DEFINE-NAMESPACE
 
 : (define-namespace name &optional (expected-type t) (binding t))
 
@@ -99,7 +99,7 @@ Note that /namespace/ itself has its own namespace.
 
 Examples are in [[EXAMPLE.org]] .
 
-* Macro NAMESPACE-LET / NSLET
+** Macro NAMESPACE-LET / NSLET
 
 =LET= with ability to lexically bind any value in the namespace.
 It currently supports /function, labels, value, symbol-macro, macrolet,
@@ -132,7 +132,7 @@ Full examples are in [[EXAMPLE.org]] .
 #+END_SRC
 
 
-* Package LISP-NAMESPACE
+** Package LISP-NAMESPACE
 
 it has =(:nicknames lispn)= .
 
