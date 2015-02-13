@@ -27,5 +27,5 @@
                 ((:file "package")
                  (:file "namespace-let"))
                 :serial t))
-  :description ""
+  :description "Provides LISP-N --- extensible namespaces in Common Lisp."
   :in-order-to ((test-op (load-op lisp-namespace.test))))
