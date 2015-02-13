@@ -33,7 +33,7 @@ what this library is for.
 
 [1] Like =(cons A B)= matching clause vs =(cons A B)= constructor.
 
-* Namespaces in CL
+* Namespaces in CL?
 
 By /namespace/ I don't mean a /package/,
 which is a way to manage symbols. It is orthogonal to /namespace/.
@@ -100,6 +100,19 @@ Note that /namespace/ itself has its own namespace.
 
 Examples are in [[EXAMPLE.org]] .
 
+* Expected Usecase?
+
+Every time you want to define a =define-cool-object= macro. E.g.,
+
++ in [[https://github.com/guicho271828/eazy-project][eazy-project]], [[https://github.com/guicho271828/eazy-project/blob/master/src/defmenu.lisp#L24][defmenu]]
++ in [[https://github.com/AccelerationNet/function-cache][function-cache]], [[https://github.com/AccelerationNet/function-cache/blob/master/src/cache.lisp#L4][defcached]] (currently implemented with hash tables)
++ in [[https://github.com/m2ym/optima][optima]], [[https://github.com/m2ym/optima/blob/master/src/pattern.lisp#L337][defpattern and pattern-expand-function]] (currently implemented
+  with symbol properties)
++ in [[https://github.com/Bike/compiler-macro][compiler-macro]], [[https://github.com/Bike/compiler-macro/blob/master/hint.lisp#L10][define-compiler-hinter]] (currently implemented with hash tables)
++ in [[https://github.com/cffi/cffi][cffi]], [[https://github.com/cffi/cffi/blob/master/src/libraries.lisp#L129][define-foreign-library]] (currently implemented with hash tables)
+ 
+* Other misc
+
 ** Macro NAMESPACE-LET / NSLET
 
 =LET= with ability to lexically bind any value in the namespace.
@@ -137,6 +150,8 @@ Full examples are in [[EXAMPLE.org]] .
 ** Package LISP-NAMESPACE
 
 it has =(:nicknames lispn)= .
+
+
 
 * Design?
 
