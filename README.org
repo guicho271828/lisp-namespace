@@ -99,7 +99,7 @@ Note that /namespace/ itself has its own namespace.
 
 Examples are in [[EXAMPLE.org]] .
 
-* Macro NAMESPACE-LET
+* Macro NAMESPACE-LET / NSLET
 
 =LET= with ability to lexically bind any value in the namespace.
 It currently supports /function, labels, value, symbol-macro, macrolet,
@@ -131,6 +131,11 @@ Full examples are in [[EXAMPLE.org]] .
 ;;                 (PRINT :X))))))))))
 #+END_SRC
 
+
+* Package LISP-NAMESPACE
+
+it has =(:nicknames lispn)= .
+
 * Design?
 
 I'm wondering which abbreviation to =namespace-let= is appropriate.
@@ -140,10 +145,10 @@ self-expressive --- =let+= does not describe how it's different from the
 original =let=.  =bind= and =where= are not considered good either, due to the
 similar reason.
 
-Simply, =nlet=? (@masatoi0 has kindly gave me an advice: =nslet= is better
-to avoid confusion with the abbreviation of =named-let=.) Or, make it =let=
-and force the user to shadow =cl:let=?  (nah I don't like it.)  Hope
-there'd be a crazy bright idea.
+I have adopted =nslet=, thanks to masatoi0@twitter's
+advice. However, there is another alternative: Make it =let= and force the
+user to shadow =cl:let=?  (nah I don't like it.)  I'm still searching for a
+crazy bright idea.
 
 * Dependencies
 
