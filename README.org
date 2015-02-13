@@ -151,6 +151,11 @@ advice. However, there is another alternative: Make it =let= and force the
 user to shadow =cl:let=?  (nah I don't like it.)  I'm still searching for a
 crazy bright idea.
 
+Here are the remaining TODOs:
+
++ There is no type declaration for the local binding.
++ X-let does not recognize =(declare (special ...))= currently.
+
 * Dependencies
 
 This library is at least tested on implementation listed below:
@@ -163,10 +168,6 @@ Also, it depends on the following libraries:
     Alexandria is a collection of portable public domain utilities.
 + introspect-environment by *Bike* :
 
-* TODOs
-
-+ local binding should hold a type declaration.
-+ X-let does not allow =(declare (special ...))= currently.
 
 * Author & Copyright
 
