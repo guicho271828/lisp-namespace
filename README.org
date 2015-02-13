@@ -89,13 +89,6 @@ DEFINE-NAMESPACE defines 4 functions/macros, and an internal hash table:
 + macro =(X-LET (binding...) body)= : lexical binding. Can be turned off
   when =binding= is nil.
 
-In general, it should be avoided to define a namespace for something that
-actually overlaps with the other in its idea. For example, consider
-defining a namespace for a function defined by =defcached= in
-[[https://github.com/AccelerationNet/function-cache][function-cache]].  As is implemented in =defcached=, the cache object
-is worth a namespace, but the function itself should be in the
-function namespace (of course), and *not* in a separate namespace.
-
 Note that /namespace/ itself has its own namespace.
 
 Examples are in [[EXAMPLE.org]] .
