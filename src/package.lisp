@@ -52,7 +52,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
            name))
   (ematch name
     ((%namespace- accessor hash condition boundp letname)
-     `(progn
+     `(eval-when (:compile-toplevel :load-toplevel :execute)
         (defvar ,hash (make-hash-table :test 'eq))
         (define-condition ,condition (unbound-variable) ()
           (:report (lambda (c s) (format s "Symbol ~a is unbound in namespace ~a"
@@ -82,12 +82,12 @@ debugging purpose. I assume there won't be so many additional namespaces.
                  ,@body)))
         (setf (gethash ',name *namespace-table*) ',name)))))
 
+(define-namespace namespace symbol nil)
+
 (defun clear-namespace (name &optional check-error)
   (when check-error
-    (assert (gethash name *namespaces*)))
+    (assert (gethash name *namespace-table*)))
   (remhash name *namespace-table*)
   (setf (symbol-value (%namespace-table name))
         (make-hash-table :test 'eq))
   name)
-
-(define-namespace namespace symbol nil)
