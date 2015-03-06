@@ -7,8 +7,7 @@
 (defpackage :lisp-namespace.test
   (:use :cl
         :lisp-namespace
-        :fiveam
-        :iterate :alexandria))
+        :fiveam))
 (in-package :lisp-namespace.test)
 
 

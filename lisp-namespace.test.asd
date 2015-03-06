@@ -13,8 +13,7 @@
 (defsystem lisp-namespace.test
   :author "Masataro Asai"
   :license "LLGPL"
-  :defsystem-depends-on (:fiveam)
-  :depends-on (:lisp-namespace :iterate)
+  :depends-on (:lisp-namespace :fiveam)
   :components ((:module "t"
                 :components
                 ((:file "package"))
