@@ -14,7 +14,7 @@
   :author "Masataro Asai"
   :license "LLGPL"
   :defsystem-depends-on (:fiveam)
-  :depends-on (:lisp-namespace)
+  :depends-on (:lisp-namespace :iterate)
   :components ((:module "t"
                 :components
                 ((:file "package"))
