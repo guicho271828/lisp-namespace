@@ -175,7 +175,6 @@ Also, it depends on the following libraries:
 
 + alexandria by ** :
     Alexandria is a collection of portable public domain utilities.
-+ introspect-environment by *Bike* :
 
 
 * Author & Copyright

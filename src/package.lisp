@@ -15,7 +15,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
 |#
 
 (defpackage :lisp-namespace
-  (:use :cl :alexandria :introspect-environment :optima)
+  (:use :cl :alexandria :optima)
   (:nicknames :lispn)
   (:export :define-namespace
            :clear-namespace
@@ -28,10 +28,6 @@ debugging purpose. I assume there won't be so many additional namespaces.
   ;; the name of this variable shoud not be changed, to maintain consistency
   ;; to the hash tables defined by define-namespace.
   (defvar *namespace-hash* (make-hash-table :test 'eq))
-  (defun speed-required ()
-    (< 2
-       (second
-        (assoc 'speed (declaration-information 'optimize)))))
   (defun %namespace-p         (name) (symbolp name))
   (defun %namespace-accessor  (name) (symbolicate "SYMBOL-" name))
   (defun %namespace-hash      (name) (symbolicate "*" name "-TABLE*"))
@@ -60,6 +56,9 @@ debugging purpose. I assume there won't be so many additional namespaces.
                                          (cell-error-name c) ',name))))
         (deftype ,type () ',expected-type)
         (declaim (ftype (function (symbol) (,type)) ,accessor))
+        (declaim (ftype (function ((,type) symbol) (,type)) (setf ,accessor)))
+        (declaim (inline ,accessor))
+        (declaim (inline (setf ,accessor)))
         (defun ,accessor (symbol)
           (multiple-value-bind (value found)
               (gethash symbol ,hash)
@@ -67,15 +66,8 @@ debugging purpose. I assume there won't be so many additional namespaces.
                 (error ',condition :name symbol))))
         (defun ,boundp (symbol)
           (nth-value 1 (gethash symbol ,hash)))
-        (declaim (ftype (function ((,type) symbol) (,type)) (setf ,accessor)))
         (defun (setf ,accessor) (new-value symbol)
-          ,@(if (speed-required)
-                nil
-                `((setf (get symbol 'name) new-value)))
           (setf (gethash symbol ,hash) new-value))
-        ,@(when (speed-required)
-            `((declare (inline ,accessor))
-              (declare (inline (setf ,accessor)))))
         ,(when binding
            `(defmacro ,letname (bindings &body body)
               `(namespace-let
@@ -90,6 +82,6 @@ debugging purpose. I assume there won't be so many additional namespaces.
   (when check-error
     (assert (gethash name *namespace-table*)))
   (remhash name *namespace-table*)
-  (setf (symbol-value (%namespace-table name))
+  (setf (symbol-value (%namespace-hash name))
         (make-hash-table :test 'eq))
   name)
