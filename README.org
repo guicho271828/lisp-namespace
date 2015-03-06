@@ -1,4 +1,7 @@
 
+[[https://travis-ci.org/guicho271828/lisp-namespace][https://travis-ci.org/guicho271828/lisp-namespace.svg?branch=master]]
+
+
 #+BEGIN_SRC
 Long time ago, in a galaxy far far away... 
 
