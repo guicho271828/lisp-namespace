@@ -59,11 +59,17 @@ debugging purpose. I assume there won't be so many additional namespaces.
         (declaim (ftype (function ((,type) symbol) (,type)) (setf ,accessor)))
         (declaim (inline ,accessor))
         (declaim (inline (setf ,accessor)))
-        (defun ,accessor (symbol)
+        (defun ,accessor (symbol &optional (default nil default-supplied-p))
+          "Automatically defined getter. When DEFAULT is supplied, the value is set automatically."
           (multiple-value-bind (value found)
               (gethash symbol ,hash)
             (if found value
-                (error ',condition :name symbol))))
+                (if default-supplied-p
+                    (setf (,accessor symbol) default)
+                    (restart-case
+                        (error ',condition :name symbol)
+                      (use-value (default)
+                        (setf (,accessor symbol) default)))))))
         (defun ,boundp (symbol)
           (nth-value 1 (gethash symbol ,hash)))
         (defun (setf ,accessor) (new-value symbol)
