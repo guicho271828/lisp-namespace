@@ -12,6 +12,8 @@
 
 (defsystem lisp-namespace.test
   :author "Masataro Asai"
+  :mailto "guicho2.71828@gmail.com"
+  :description "test system for lisp-namespace"
   :license "LLGPL"
   :depends-on (:lisp-namespace :fiveam)
   :components ((:module "t"
