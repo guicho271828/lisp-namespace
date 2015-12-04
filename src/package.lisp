@@ -28,13 +28,26 @@ debugging purpose. I assume there won't be so many additional namespaces.
   ;; the name of this variable shoud not be changed, to maintain consistency
   ;; to the hash tables defined by define-namespace.
   (defvar *namespace-hash* (make-hash-table :test 'eq))
-  (defun %namespace-p         (name) (symbolp name))
-  (defun %namespace-accessor  (name) (symbolicate "SYMBOL-" name))
-  (defun %namespace-hash      (name) (symbolicate "*" name "-TABLE*"))
-  (defun %namespace-condition (name) (symbolicate "UNBOUND-" name))
-  (defun %namespace-boundp    (name) (symbolicate name "-BOUNDP"))
-  (defun %namespace-type      (name) (symbolicate name "-TYPE"))
-  (defun %namespace-letname   (name) (symbolicate name "-LET")))
+  (defstruct (%namespace
+              (:constructor %namespace
+                            (name
+                             &aux
+                             (accessor  (symbolicate "SYMBOL-" name))
+                             (hash      (symbolicate "*" name "-TABLE*"))
+                             (condition (symbolicate "UNBOUND-" name))
+                             (boundp    (symbolicate name "-BOUNDP"))
+                             (type      (symbolicate name "-TYPE"))
+                             (letname   (symbolicate name "-LET")))))
+    (name      (error "anonymous namespace?")   :type symbol :read-only t)
+    (accessor  nil :type symbol :read-only t)
+    (hash      nil :type symbol :read-only t)
+    (condition nil :type symbol :read-only t)
+    (boundp    nil :type symbol :read-only t)
+    (type      nil :type symbol :read-only t)
+    (letname   nil :type symbol :read-only t))
+  (defmethod make-load-form ((ns %namespace) &optional environment)
+    (make-load-form-saving-slots ns :environment environment)))
+
 
 (defmacro define-namespace (name &optional
                                    (expected-type t)
@@ -47,8 +60,8 @@ debugging purpose. I assume there won't be so many additional namespaces.
                        value))
     (error "~a cannot be used as a namespace because it conflicts with the standard Common Lisp!"
            name))
-  (ematch name
-    ((%namespace- accessor hash condition boundp letname type)
+  (ematch (%namespace name)
+    ((and ns (%namespace- accessor hash condition boundp letname type))
      `(eval-when (:compile-toplevel :load-toplevel :execute)
         (defvar ,hash (make-hash-table :test 'eq))
         (define-condition ,condition (unbound-variable) ()
@@ -74,15 +87,15 @@ debugging purpose. I assume there won't be so many additional namespaces.
                         (setf (,accessor symbol) default)))))))
         (defun ,boundp (symbol)
           (nth-value 1 (gethash symbol ,hash)))
-        ,(when binding
-           `(defmacro ,letname (bindings &body body)
-              `(namespace-let
-                   ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
-                            bindings)
-                 ,@body)))
-        (setf (gethash ',name *namespace-table*) ',name)))))
+        ,@(when binding
+            `((defmacro ,letname (bindings &body body)
+                `(namespace-let
+                     ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
+                              bindings)
+                   ,@body))))
+        (setf (gethash ',name *namespace-table*) ,ns)))))
 
-(define-namespace namespace symbol nil)
+(define-namespace namespace %namespace nil)
 
 (defun clear-namespace (name &optional check-error)
   (when check-error
