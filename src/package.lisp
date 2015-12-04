@@ -97,10 +97,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
 
 (define-namespace namespace %namespace nil)
 
-(defun clear-namespace (name &optional check-error)
-  (when check-error
-    (assert (gethash name *namespace-table*)))
-  (remhash name *namespace-table*)
-  (setf (symbol-value (%namespace-hash name))
-        (make-hash-table :test 'eq))
+(defun clear-namespace (name)
+  (assert (gethash name *namespace-table*))
+  (clrhash (symbol-value (%namespace-hash (gethash name *namespace-table*))))
   name)
