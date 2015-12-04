@@ -20,6 +20,6 @@
                 :components
                 ((:file "package"))
                 :serial t))
-  :perform (load-op :after (op c) 
+  :perform (test-op :after (op c)
 		    (eval (read-from-string "(5am:run! :lisp-namespace)"))
 		    (asdf:clear-system c)))

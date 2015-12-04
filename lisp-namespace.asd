@@ -28,4 +28,4 @@
                  (:file "namespace-let"))
                 :serial t))
   :description "Provides LISP-N --- extensible namespaces in Common Lisp."
-  :in-order-to ((test-op (load-op lisp-namespace.test))))
+  :in-order-to ((test-op (test-op lisp-namespace.test))))
