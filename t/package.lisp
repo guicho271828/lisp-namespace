@@ -7,7 +7,11 @@
 (defpackage :lisp-namespace.test
   (:use :cl
         :lisp-namespace
-        :fiveam))
+        :fiveam)
+  (:export :mytest
+           :symbol-mytest
+           :unbound-mytest
+           :mytest-let))
 (in-package :lisp-namespace.test)
 
 
@@ -54,40 +58,82 @@
       (let ((b 1))
         (print :x)))))
 
-(define-namespace test fixnum)
+(define-namespace mytest fixnum)
 
 (test namespace
   (finishes
-    (setf (symbol-test 'a) 0))
-  (is (= (symbol-test 'a)))
-  (signals unbound-test
-    (symbol-test 'b))
+    (setf (symbol-mytest 'a) 0))
+  (is (= (symbol-mytest 'a)))
+  (signals unbound-mytest
+    (symbol-mytest 'b))
   ;; lexical
   (is (= 1
          (funcall
-          (namespace-let (((test a) 1))
+          (namespace-let (((mytest a) 1))
             (lambda ()
-              (symbol-test 'a))))))
+              (symbol-mytest 'a))))))
   (let (x)
-    (namespace-let (((test a) 1))
+    (namespace-let (((mytest a) 1))
       (setf x 
             (lambda ()
-              (symbol-test 'a))))
+              (symbol-mytest 'a))))
     (is (= 1 (funcall x))))
   ;; lexical, specialized
   (let (x)
-    (test-let ((a 1))
+    (mytest-let ((a 1))
       (setf x 
             (lambda ()
-              (symbol-test 'a))))
+              (symbol-mytest 'a))))
     (is (= 1 (funcall x))))
 
   ;; nested
   (let (x y)
-    (test-let ((a 1))
-      (setf x (lambda () (symbol-test 'a)))
-      (test-let ((a 2))
-        (setf y (lambda () (symbol-test 'a)))))
+    (mytest-let ((a 1))
+      (setf x (lambda () (symbol-mytest 'a)))
+      (mytest-let ((a 2))
+        (setf y (lambda () (symbol-mytest 'a)))))
     (is (= 1 (funcall x)))
     (is (= 2 (funcall y)))))
 
+(defpackage :other-package
+  (:use :cl :lisp-namespace :fiveam :lisp-namespace.test))
+
+(test export
+  (in-package :other-package)
+  (eval
+   (read-from-string
+    (princ-to-string
+     '(progn
+       (finishes
+         (setf (symbol-mytest 'a) 0))
+       (is (= (symbol-mytest 'a)))
+       (signals unbound-mytest
+         (symbol-mytest 'b))
+       ;; lexical
+       (is (= 1
+            (funcall
+             (namespace-let (((mytest a) 1))
+               (lambda ()
+                 (symbol-mytest 'a))))))
+       (let (x)
+         (namespace-let (((mytest a) 1))
+           (setf x 
+                 (lambda ()
+                   (symbol-mytest 'a))))
+         (is (= 1 (funcall x))))
+       ;; lexical, specialized
+       (let (x)
+         (mytest-let ((a 1))
+           (setf x 
+                 (lambda ()
+                   (symbol-mytest 'a))))
+         (is (= 1 (funcall x))))
+
+       ;; nested
+       (let (x y)
+         (mytest-let ((a 1))
+           (setf x (lambda () (symbol-mytest 'a)))
+           (mytest-let ((a 2))
+             (setf y (lambda () (symbol-mytest 'a)))))
+         (is (= 1 (funcall x)))
+         (is (= 2 (funcall y)))))))))
