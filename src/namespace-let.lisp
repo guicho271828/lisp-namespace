@@ -20,41 +20,47 @@
 ;; mutual recursion
 
 (defun %pickone (bindings body)
-  (ematch bindings
-    ;; function-like binding
-    (`(((function ,name) ,@definition) ,@rest)
-      (%merge 'flet name definition body rest))
-    (`(((label ,name) ,@definition) ,@rest)
-      (%merge 'labels name definition body rest))
-    (`(((macro ,name) ,@definition) ,@rest)
-      (%merge 'macrolet name definition body rest))
-    ;; variable-like binding
-    (`(((symbol-macro ,name) ,@definition) ,@rest)
-      (%merge 'symbol-macrolet name definition body rest))
-    (`((,(and name (type symbol)) ,@definition) ,@rest)
-      (%merge 'let name definition body rest))
-    ;; handler binding
-    (`(((handler ,name) ,@definition) ,@rest)
-      (%merge 'handler-bind name definition body rest))
-    (`(((restart ,name) ,@definition) ,@rest)
-      (%merge 'restart-bind name definition body rest))
-    ;; namespace binding
-    (`(((,(and namespace (namespace-bound)) ,name) ,@definition) ,@rest)
-      (%pickone rest (%wrap namespace name definition body)))
-    (`() `(progn ,@body))))
+  (if bindings
+      (destructuring-bind ((specifier &rest definition) &rest rest) bindings
+        (cond
+          ((listp specifier)
+           (destructuring-bind (namespace name) specifier
+             (case namespace
+               ;; function-like binding
+               (function
+                (%merge 'flet name definition body rest))
+               (label
+                (%merge 'labels name definition body rest))
+               (macro
+                (%merge 'macrolet name definition body rest))
+               ;; variable-like binding
+               (symbol-macro
+                (%merge 'symbol-macrolet name definition body rest))
+               ;; handler binding
+               (handler
+                (%merge 'handler-bind name definition body rest))
+               (restart
+                (%merge 'restart-bind name definition body rest))
+               (otherwise
+                (if (namespace-boundp namespace)
+                    (%pickone rest (%wrap namespace name definition body))
+                    (error "unknown namespace ~a !" namespace))))))
+          ((symbolp specifier)
+           (%merge 'let specifier definition body rest))))
+      `(progn ,@body)))
 
 (defun %merge (kind name def body rest)
   (%pickone
    rest
-   (match body
-     (`((,(eq kind) (,@bindings) ,@body))
-      `((,kind ((,name ,@def) ,@bindings) ,@body)))
-     (_
-      `((,kind ((,name ,@def)) ,@body))))))
+   (handler-case
+       (destructuring-bind ((kind2 bindings &rest newbody)) body
+         (assert (eq kind kind2))
+         `((,kind ((,name ,@def) ,@bindings) ,@newbody)))
+     (error ()
+       `((,kind ((,name ,@def)) ,@body))))))
 
 (defun %wrap (namespace name definition body)
-  (ematch (symbol-namespace namespace)
-    ((%namespace- accessor type)
+  (with-slots (accessor type) (symbol-namespace namespace)
      (with-gensyms (temp)
        `((let ((,temp ,@definition))
            (declare (type (,type) ,temp))
@@ -62,7 +68,7 @@
                         (if (equal x '(quote ,name))
                             ',temp
                             whole)))
-             ,@body)))))))
+             ,@body))))))
 
 ;; lexical nickname for packages : abondoned
 
