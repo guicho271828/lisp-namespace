@@ -60,40 +60,40 @@ debugging purpose. I assume there won't be so many additional namespaces.
                        value))
     (error "~a cannot be used as a namespace because it conflicts with the standard Common Lisp!"
            name))
-  (ematch (%namespace name)
-    ((and ns (%namespace- accessor hash condition boundp letname type))
-     `(eval-when (:compile-toplevel :load-toplevel :execute)
-        (defvar ,hash (make-hash-table :test 'eq))
-        (define-condition ,condition (unbound-variable) ()
-          (:report (lambda (c s) (format s "Symbol ~a is unbound in namespace ~a"
-                                         (cell-error-name c) ',name))))
-        (deftype ,type () ',expected-type)
-        (declaim (ftype (function (symbol &optional ,type) (,type)) ,accessor))
-        (declaim (ftype (function ((,type) symbol) (,type)) (setf ,accessor)))
-        (declaim (inline ,accessor))
-        (declaim (inline (setf ,accessor)))
-        (defun (setf ,accessor) (new-value symbol)
-          (setf (gethash symbol ,hash) new-value))
-        (defun ,accessor (symbol &optional (default nil default-supplied-p))
-          "Automatically defined getter. When DEFAULT is supplied, the value is set automatically."
-          (multiple-value-bind (value found)
-              (gethash symbol ,hash)
-            (if found value
-                (if default-supplied-p
-                    (setf (,accessor symbol) default)
-                    (restart-case
-                        (error ',condition :name symbol)
-                      (use-value (default)
-                        (setf (,accessor symbol) default)))))))
-        (defun ,boundp (symbol)
-          (nth-value 1 (gethash symbol ,hash)))
-        ,@(when namespace-let
-            `((defmacro ,letname (bindings &body body)
-                `(namespace-let
-                     ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
-                              bindings)
-                   ,@body))))
-        (setf (gethash ',name *namespace-table*) ,ns)))))
+  (let ((ns (%namespace name)))
+    (with-slots (accessor hash condition boundp letname type) ns
+       `(eval-when (:compile-toplevel :load-toplevel :execute)
+          (defvar ,hash (make-hash-table :test 'eq))
+          (define-condition ,condition (unbound-variable) ()
+            (:report (lambda (c s) (format s "Symbol ~a is unbound in namespace ~a"
+                                           (cell-error-name c) ',name))))
+          (deftype ,type () ',expected-type)
+          (declaim (ftype (function (symbol &optional ,type) (,type)) ,accessor))
+          (declaim (ftype (function ((,type) symbol) (,type)) (setf ,accessor)))
+          (declaim (inline ,accessor))
+          (declaim (inline (setf ,accessor)))
+          (defun (setf ,accessor) (new-value symbol)
+            (setf (gethash symbol ,hash) new-value))
+          (defun ,accessor (symbol &optional (default nil default-supplied-p))
+            "Automatically defined getter. When DEFAULT is supplied, the value is set automatically."
+            (multiple-value-bind (value found)
+                (gethash symbol ,hash)
+              (if found value
+                  (if default-supplied-p
+                      (setf (,accessor symbol) default)
+                      (restart-case
+                          (error ',condition :name symbol)
+                        (use-value (default)
+                          (setf (,accessor symbol) default)))))))
+          (defun ,boundp (symbol)
+            (nth-value 1 (gethash symbol ,hash)))
+          ,@(when namespace-let
+              `((defmacro ,letname (bindings &body body)
+                  `(namespace-let
+                       ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
+                                bindings)
+                     ,@body))))
+          (setf (gethash ',name *namespace-table*) ,ns)))))
 
 (define-namespace namespace %namespace nil)
 
