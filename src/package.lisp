@@ -15,7 +15,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
 |#
 
 (defpackage :lisp-namespace
-  (:use :cl :alexandria :optima)
+  (:use :cl :alexandria)
   (:nicknames :lispn)
   (:export :define-namespace
            :clear-namespace
