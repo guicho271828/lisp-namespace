@@ -51,7 +51,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
 
 (defmacro define-namespace (name &optional
                                    (expected-type t)
-                                   (binding t))
+                                   (namespace-let t))
   (when (member name '(function
                        macrolet
                        name
@@ -87,7 +87,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
                         (setf (,accessor symbol) default)))))))
         (defun ,boundp (symbol)
           (nth-value 1 (gethash symbol ,hash)))
-        ,@(when binding
+        ,@(when namespace-let
             `((defmacro ,letname (bindings &body body)
                 `(namespace-let
                      ,(mapcar (lambda (bind) `((,',name ,(car bind)) ,@(cdr bind)))
