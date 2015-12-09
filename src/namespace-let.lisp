@@ -9,8 +9,6 @@
 ;; bind --- I dont think it is cool, similar reason to where
 ;; overwriting cl:let --- well, maybe optional
 
-(named-readtables:in-readtable :fare-quasiquote)
-
 (defmacro namespace-let (bindings &body body)
   (%pickone (reverse bindings) `((progn ,@body))))
 
