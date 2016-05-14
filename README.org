@@ -11,6 +11,10 @@ namespace, have fought for the
 design of their language against lisp-1.
 #+END_SRC
 
+tl;dr; → skip to API definition https://github.com/guicho271828/lisp-namespace#macro-define-namespace
+
++ update (2016/5/14) : added support for `documentation` and `describe`.
+
 * Introduction
 
 # However, destructuring is merely
@@ -78,7 +82,7 @@ corresponding function.
 
 ** Macro DEFINE-NAMESPACE
 
-: (define-namespace name &optional (expected-type t) (binding t))
+: (define-namespace name &optional (expected-type t) (binding t) (documentation ""))
 
 This macro defines a namespace. For the given name of namespace X,
 DEFINE-NAMESPACE defines 4 functions/macros, and an internal hash table:
@@ -92,7 +96,10 @@ DEFINE-NAMESPACE defines 4 functions/macros, and an internal hash table:
 + macro =(X-LET (binding...) body)= : lexical binding. Can be turned off
   when =binding= is nil.
 
-Note that /namespace/ itself has its own namespace.
+
+It also defines a method for `cl:documentation` and extend `describe-object` for symbols with an `:after` method. For example, you will be able to `(setf (documentation 'mysymbol 'x) "description")` and you will see it pretty printed in `(describe 'mysymbol)`.
+
+Note that /namespace/ itself has its own namespace. The optional argument `documentation` to `define-namespace` is a docstring of the namespace itself. It will be set to `(setf (documentation NAME 'namespace) documentation)` and will also be visible from `describe`.
 
 Examples are in [[EXAMPLE.org]] .
 
