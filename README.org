@@ -85,9 +85,8 @@ corresponding function.
 : (define-namespace name &optional (expected-type t) (binding t) (documentation ""))
 
 This macro defines a namespace. For the given name of namespace X,
-DEFINE-NAMESPACE defines 4 functions/macros, and an internal hash table:
+DEFINE-NAMESPACE defines 4 functions/macros:
 
-+ =*X-TABLE*= : hashtable
 + =#'symbol-x, #'(setf symbol-x)= : accessor to the global binding. Optionally,
   =expected-type= provides =ftype= proclamation and results in the
   better optimization. =expected-type= is not evaluated.
@@ -96,8 +95,37 @@ DEFINE-NAMESPACE defines 4 functions/macros, and an internal hash table:
 + macro =(X-LET (binding...) body)= : lexical binding. Can be turned off
   when =binding= is nil.
 
+** Extending the usability of =documentation= and =describe=
 
-It also defines a method for =cl:documentation= and extend =describe-object= with an =:after= method. For example, you will be able to =(setf (documentation 'mysymbol 'x) "description")= and you will see it pretty printed in =(describe 'mysymbol)=.
+=define-namespace= also defines a method for =cl:documentation= and extend =cl:describe-object=. For example, you will be able to =(setf (documentation 'mysymbol 'x) "description")= and you will see it pretty printed in =(describe 'mysymbol)=.
+
+Here is an example used in TRIVIA pattern matcher. Trivia has an =assoc= pattern, and everyone would feel happy if we can browse the documentation of this pattern from SLIME C-c C-d. Here is such an output on SBCL:
+
+#+begin_src
+COMMON-LISP:ASSOC
+  [symbol]
+
+ASSOC names a compiled function:
+  Lambda-list: (ITEM ALIST &KEY KEY (TEST NIL TESTP)
+                (TEST-NOT NIL NOTP))
+  Declared type: (FUNCTION
+                  (T LIST &KEY (:KEY (OR FUNCTION SYMBOL))
+                   (:TEST (OR FUNCTION SYMBOL))
+                   (:TEST-NOT (OR FUNCTION SYMBOL)))
+                  (VALUES LIST &OPTIONAL))
+  Documentation:
+    Return the cons in ALIST whose car is equal (by a given test or EQL) to
+       the ITEM.
+  Known attributes: call, foldable, flushable, unsafely-flushable
+  Source file: SYS:SRC;CODE;LIST.LISP
+
+Symbol ASSOC is bound in a namespace PATTERN:
+  Value: #<FUNCTION 'ASSOC {1004B19A0B}>
+  Documentation:
+    It matches when the object X is a list, and then further matches the contents
+    returned by (cdr (assoc item X...)) against SUBPATTERN.
+    If :KEY and :TEST is specified, they are passed to ASSOC.
+#+end_src
 
 Note that /namespace/ itself has its own namespace. The optional argument =documentation= to =define-namespace= is a docstring of the namespace itself. It will be set to =(setf (documentation NAME 'namespace) documentation)= and will also be visible from =describe=.
 
