@@ -45,8 +45,9 @@ which is a way to manage symbols. It is orthogonal to /namespace/.
 
 CL already has major 2 namespaces, /function/ namespace and /value/
 namespace (or /variable/ namespace), but there are actually more --- e.g.,
-there are also /class/ namespace. Same symbol can represent different
-objects in each namespace. For example, all these below can coexist in a
+/class/ namespace. Since the same symbol can represent different
+objects in each namespace, this is obviously orthogonal to /package/.
+For example, all these below can coexist in a
 same file without errors, and each object is accessible with the
 corresponding function.
 
