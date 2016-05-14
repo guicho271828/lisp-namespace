@@ -88,11 +88,11 @@ This macro defines a namespace. For the given name of namespace X,
 DEFINE-NAMESPACE defines 4 functions/macros, and an internal hash table:
 
 + =*X-TABLE*= : hashtable
-+ =#'symbol-x, #'(setf symbol-x)= : accessor, special binding. Optionally,
++ =#'symbol-x, #'(setf symbol-x)= : accessor to the global binding. Optionally,
   =expected-type= provides =ftype= proclamation and results in the
   better optimization. =expected-type= is not evaluated.
-+ =#'x-boundp= : boolean
-+ condition =UNBOUND-X=
++ =#'x-boundp= : unary function returning a boolean
++ condition =UNBOUND-X= which is signaled when trying to access the value of an unbounded symbol.
 + macro =(X-LET (binding...) body)= : lexical binding. Can be turned off
   when =binding= is nil.
 
