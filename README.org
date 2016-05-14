@@ -20,22 +20,20 @@ tl;dr; → skip to API definition https://github.com/guicho271828/lisp-namespace
 # However, destructuring is merely
 # a syntax sugar for writing the accessor.
 
-There are several libraries for extending =let=. To my knowledge,
+There are several libraries which extends =let=. To my knowledge,
 most of them goes toward destructuring, e.g., allowing
 =&some-fancy-directive= in the argument list.  However, destructuring is
-now considered obsolete: it is superseded by pattern-matching, which
-cleanly combines =cond=, =typecase=, destructuring and constructor API[1].
-
-Those =let= extensions are subject to a variation of greenspun's rule: they
-are the /ad hoc, informally-specified, bug-ridden, slow implementation of
-half of pattern-matching in ML/. (And I favor [[https://github.com/m2ym/optima][optima]] in this sense.) Now it
-comes to my mind: what could be the *orthogonal* aspect
+now **obsolete**: superseded by pattern-matching (e.g. fare-matcher, optima, trivia), which
+cleanly combines =cond=, =typecase=, destructuring and constructors[1].
+Now it comes to my mind: what could be the *orthogonal* aspect
 that could be combined with =let=, or, =let + cond = pattern matching= ?
 
 Then I noticed an oddness in flet, macrolet, labels, let,
-symbol-macrolet. Pattern matching works in the value namespace only. Also,
-while special bindings for /namespaces/ can be trivially implemented with a
-hash table, the lexical binding is not --- it's worth a library.  This is
+symbol-macrolet. Pattern matching works in the value namespace only. 
+# Also,
+# while special bindings for /namespaces/ can be trivially implemented with a
+# hash table, the lexical binding is not
+--- it's worth a library.  This is
 what this library is for.
 
 [1] Like =(cons A B)= matching clause vs =(cons A B)= constructor.
