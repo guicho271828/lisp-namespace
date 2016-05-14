@@ -97,9 +97,9 @@ DEFINE-NAMESPACE defines 4 functions/macros, and an internal hash table:
   when =binding= is nil.
 
 
-It also defines a method for `cl:documentation` and extend `describe-object` for symbols with an `:after` method. For example, you will be able to `(setf (documentation 'mysymbol 'x) "description")` and you will see it pretty printed in `(describe 'mysymbol)`.
+It also defines a method for =cl:documentation= and extend =describe-object= with an =:after= method. For example, you will be able to =(setf (documentation 'mysymbol 'x) "description")= and you will see it pretty printed in =(describe 'mysymbol)=.
 
-Note that /namespace/ itself has its own namespace. The optional argument `documentation` to `define-namespace` is a docstring of the namespace itself. It will be set to `(setf (documentation NAME 'namespace) documentation)` and will also be visible from `describe`.
+Note that /namespace/ itself has its own namespace. The optional argument =documentation= to =define-namespace= is a docstring of the namespace itself. It will be set to =(setf (documentation NAME 'namespace) documentation)= and will also be visible from =describe=.
 
 Examples are in [[EXAMPLE.org]] .
 
