@@ -99,7 +99,9 @@ DEFINE-NAMESPACE defines 4 functions/macros:
 
 =define-namespace= also defines a method for =cl:documentation= and extend =cl:describe-object=. For example, you will be able to =(setf (documentation 'mysymbol 'x) "description")= and you will see it pretty printed in =(describe 'mysymbol)=.
 
-Here is an example used in TRIVIA pattern matcher. Trivia has an =assoc= pattern, and everyone would feel happy if we can browse the documentation of this pattern from SLIME C-c C-d. Here is such an output on SBCL:
+Here is an example used in TRIVIA pattern matcher. Trivia has an =assoc= pattern, and everyone would feel happy if we can browse the documentation of this pattern from SLIME C-c C-d. Below is such an output on SBCL.
+
+While such a practice is taken by some libraries (e.g. QL-HTTP and Stefil defines =describe= methods), those facility is made independently, and this feature is not much popular.
 
 #+begin_src
 COMMON-LISP:ASSOC
