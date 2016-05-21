@@ -85,7 +85,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
             (:report (lambda (c s) (format s "Symbol ~a is unbound in namespace ~a"
                                            (cell-error-name c) ',name))))
           (deftype ,type () ',expected-type)
-          (declaim (ftype (function (symbol &optional ,type) (,type)) ,accessor)
+          (declaim (ftype (function (symbol &optional (or null ,type)) (,type)) ,accessor)
                    (ftype (function ((,type) symbol) (,type)) (setf ,accessor))
                    (inline ,accessor)
                    (inline (setf ,accessor)))
