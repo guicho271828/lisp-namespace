@@ -12,7 +12,7 @@
 
 (defsystem lisp-namespace.test
   :author "Masataro Asai"
-  :mailto "guicho2.71828@gmail.com"
+  #+asdf3 :mailto #+asdf3 "guicho2.71828@gmail.com"
   :description "test system for lisp-namespace"
   :license "LLGPL"
   :depends-on (:lisp-namespace :uiop :fiveam)
