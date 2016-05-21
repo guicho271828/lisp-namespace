@@ -14,6 +14,7 @@ design of their language against lisp-1.
 tl;dr; → skip to API definition https://github.com/guicho271828/lisp-namespace#macro-define-namespace
 
 + update (2016/5/14) : added support for `documentation` and `describe`.
++ update (2016/5/21) : works on ECL, CLISP, ABCL and CMUCL.
 
 * Introduction
 
