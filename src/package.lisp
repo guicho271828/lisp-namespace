@@ -48,7 +48,9 @@ debugging purpose. I assume there won't be so many additional namespaces.
     (letname   nil :type symbol :read-only t)
     (doc-table nil :type symbol :read-only t))
   (defmethod make-load-form ((ns %namespace) &optional environment)
-    (make-load-form-saving-slots ns :environment environment)))
+    (make-load-form-saving-slots ns :environment environment))
+  (defmethod print-object ((ns %namespace) s)
+    (print (make-load-form ns) s)))
 
 
 (defmacro define-namespace (name &optional
