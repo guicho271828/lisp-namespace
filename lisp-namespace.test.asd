@@ -15,7 +15,7 @@
   :mailto "guicho2.71828@gmail.com"
   :description "test system for lisp-namespace"
   :license "LLGPL"
-  :depends-on (:lisp-namespace :fiveam)
+  :depends-on (:lisp-namespace :fiveam :uiop)
   :components ((:module "t"
                 :components
                 ((:file "package"))
