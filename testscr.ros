@@ -4,6 +4,7 @@
 exec ros -Q -- $0 "$@"
 |#
 
+(ql:quickload :uiop)
 (ql:quickload :fiveam)
 
 (defun test (sys &optional (tsys sys))
