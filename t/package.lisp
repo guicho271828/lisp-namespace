@@ -93,7 +93,9 @@
       (mytest-let ((a 2))
         (setf y (lambda () (symbol-mytest 'a)))))
     (is (= 1 (funcall x)))
-    (is (= 2 (funcall y)))))
+    (is (= 2 (funcall y))))
+  (finishes
+   (describe 'mytest)))
 
 (defpackage :other-package
   (:use :cl :lisp-namespace :fiveam :lisp-namespace.test))
@@ -106,7 +108,7 @@
      '(progn
        (finishes
          (setf (symbol-mytest 'a) 0))
-       (is (= (symbol-mytest 'a)))
+       (is (= 0 (symbol-mytest 'a)))
        (signals unbound-mytest
          (symbol-mytest 'b))
        ;; lexical

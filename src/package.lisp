@@ -24,32 +24,45 @@ debugging purpose. I assume there won't be so many additional namespaces.
 
 (in-package :lispn)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  ;; the name of this variable shoud not be changed, to maintain consistency
-  ;; to the hash tables defined by define-namespace.
-  (defvar *namespace-hash* (make-hash-table :test 'eq))
-  (defstruct (%namespace
-              (:constructor %namespace
-                            (name
-                             &aux
-                             (accessor  (symbolicate "SYMBOL-" name))
-                             (hash      (symbolicate "*" name "-TABLE*"))
-                             (condition (symbolicate "UNBOUND-" name))
-                             (boundp    (symbolicate name "-BOUNDP"))
-                             (type      (symbolicate name "-TYPE"))
-                             (letname   (symbolicate name "-LET"))
-                             (doc-table (symbolicate "*" name "-DOC-TABLE*")))))
-    (name      (error "anonymous namespace?")   :type symbol :read-only t)
-    (accessor  nil :type symbol :read-only t)
-    (hash      nil :type symbol :read-only t) ;; default values are fed by the constructor above
-    (condition nil :type symbol :read-only t)
-    (boundp    nil :type symbol :read-only t)
-    (type      nil :type symbol :read-only t)
-    (letname   nil :type symbol :read-only t)
-    (doc-table nil :type symbol :read-only t))
-  (defmethod make-load-form ((ns %namespace) &optional environment)
-    (make-load-form-saving-slots ns :environment environment)))
-
+;; the name of this variable shoud not be changed, to maintain consistency
+;; to the hash tables defined by define-namespace.
+(defvar *namespace-hash* (make-hash-table :test 'eq))
+(defstruct (%namespace
+            (:constructor %namespace
+                          (name
+                           &aux
+                           (accessor  (symbolicate "SYMBOL-" name))
+                           (hash      (symbolicate "*" name "-TABLE*"))
+                           (condition (symbolicate "UNBOUND-" name))
+                           (boundp    (symbolicate name "-BOUNDP"))
+                           (type      (symbolicate name "-TYPE"))
+                           (letname   (symbolicate name "-LET"))
+                           (doc-table (symbolicate "*" name "-DOC-TABLE*")))))
+  (name      (error "anonymous namespace?")   :type symbol :read-only t)
+  (accessor  nil :type symbol :read-only t)
+  (hash      nil :type symbol :read-only t) ;; default values are fed by the constructor above
+  (condition nil :type symbol :read-only t)
+  (boundp    nil :type symbol :read-only t)
+  (type      nil :type symbol :read-only t)
+  (letname   nil :type symbol :read-only t)
+  (doc-table nil :type symbol :read-only t))
+(defmethod make-load-form ((ns %namespace) &optional environment)
+  (make-load-form-saving-slots ns :environment environment))
+(defmethod print-object ((ns %namespace) s)
+  (pprint-logical-block (s nil :prefix "#S(" :suffix ")")
+    (prin1 '%namespace s)
+    (write-char #\Space s)
+    (pprint-logical-block (s nil)
+      (format s "~{~s ~s~^~:@_~}"
+              (with-slots (name accessor hash condition boundp type letname doc-table) ns
+                 `(:name ',name
+                         :accessor ',accessor
+                         :hash ',hash
+                         :condition ',condition
+                         :boundp ',boundp
+                         :type ',type
+                         :letname ',letname
+                         :doc-table ',doc-table))))))
 
 (defmacro define-namespace (name &optional
                                    (expected-type t)
@@ -72,7 +85,7 @@ debugging purpose. I assume there won't be so many additional namespaces.
             (:report (lambda (c s) (format s "Symbol ~a is unbound in namespace ~a"
                                            (cell-error-name c) ',name))))
           (deftype ,type () ',expected-type)
-          (declaim (ftype (function (symbol &optional ,type) (,type)) ,accessor)
+          (declaim (ftype (function (symbol &optional (or null ,type)) (,type)) ,accessor)
                    (ftype (function ((,type) symbol) (,type)) (setf ,accessor))
                    (inline ,accessor)
                    (inline (setf ,accessor)))
@@ -105,30 +118,4 @@ debugging purpose. I assume there won't be so many additional namespaces.
           (defmethod (setf documentation) (newdoc (x symbol) (type (eql ',name)))
             (setf (gethash x ,doc-table) newdoc))
           (setf (documentation ',name 'namespace) ,documentation)))))
-
-(define-namespace namespace %namespace nil "A namespace for managing namespaces themselves.")
-
-(defun clear-namespace (name)
-  (assert (gethash name *namespace-table*))
-  (clrhash (symbol-value (%namespace-hash (gethash name *namespace-table*))))
-  name)
-
-(defmethod describe-object :after ((x symbol) s)
-  (let ((*print-pretty* t))
-    (pprint-logical-block (s nil)
-      (maphash (lambda (name ns)
-                 (when (funcall (%namespace-boundp ns) x)
-                   (pprint-logical-block (s nil)
-                     (format s "~@:_Symbol ~S is bound in a namespace ~S:" x name)
-                     (pprint-indent :block 2 s)
-                     (format s "~@:_Value: ~S" (funcall (%namespace-accessor ns) x))
-                     (if-let ((doc (documentation x name)))
-                       (progn
-                         (format s "~@:_Documentation: ~@:_")
-                         (pprint-logical-block (s nil :per-line-prefix "  ")
-                           (princ doc s)))
-                       (format s "~@:_(undocumented)")))))
-               *namespace-table*))))
-
-;; (princ (documentation 'namespace 'namespace))
 

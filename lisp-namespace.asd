@@ -24,6 +24,7 @@
   :components ((:module "src"
                 :components
                 ((:file "package")
+                 (:file "namespace")
                  (:file "namespace-let"))
                 :serial t))
   :description "Provides LISP-N --- extensible namespaces in Common Lisp."
