@@ -108,7 +108,7 @@
      '(progn
        (finishes
          (setf (symbol-mytest 'a) 0))
-       (is (= (symbol-mytest 'a)))
+       (is (= 0 (symbol-mytest 'a)))
        (signals unbound-mytest
          (symbol-mytest 'b))
        ;; lexical
