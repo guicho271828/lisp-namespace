@@ -103,7 +103,7 @@ Here is an example used in TRIVIA pattern matcher. Trivia has an =assoc= pattern
 
 While such a practice is taken by some libraries (e.g. QL-HTTP and Stefil defines =describe= methods), those facility is made independently, and this feature is not much popular.
 
-#+begin_src
+#+begin_src diff
 COMMON-LISP:ASSOC
   [symbol]
 
@@ -121,12 +121,12 @@ ASSOC names a compiled function:
   Known attributes: call, foldable, flushable, unsafely-flushable
   Source file: SYS:SRC;CODE;LIST.LISP
 
-Symbol ASSOC is bound in a namespace PATTERN:
-  Value: #<FUNCTION 'ASSOC {1004B19A0B}>
-  Documentation:
-    It matches when the object X is a list, and then further matches the contents
-    returned by (cdr (assoc item X...)) against SUBPATTERN.
-    If :KEY and :TEST is specified, they are passed to ASSOC.
++Symbol ASSOC is bound in a namespace PATTERN:
++  Value: #<FUNCTION 'ASSOC {1004B19A0B}>
++  Documentation:
++    It matches when the object X is a list, and then further matches the contents
++    returned by (cdr (assoc item X...)) against SUBPATTERN.
++    If :KEY and :TEST is specified, they are passed to ASSOC.
 #+end_src
 
 Note that /namespace/ itself has its own namespace. The optional argument =documentation= to =define-namespace= is a docstring of the namespace itself. It will be set to =(setf (documentation NAME 'namespace) documentation)= and will also be visible from =describe=.
