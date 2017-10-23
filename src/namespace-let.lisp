@@ -10,6 +10,22 @@
 ;; overwriting cl:let --- well, maybe optional
 
 (defmacro namespace-let (bindings &body body)
+  "Bindings is a list of bindings where each car is of form (NAMESPACE NAME),
+ or a symbol NAME for a variable namespace.
+
+ function, macro, label, symbol-macro, handler, restart is by default recognized as a namespace.
+
+Example:
+(namespace-let ((#'x (y) (1+ y)) ; -- equivalent to ((function x) (y) (1+ y))
+                ((macro x) (y) (1+ y))
+                ((macro y) (y) (1+ y))
+                (#'x (y) (1+ y))
+                ((label y) (y) (y y))
+                ((symbol-macro sm) 0)
+                (b 0))
+  (let ((b 1))
+    (print :x)))
+"
   (%pickone (reverse bindings) `((progn ,@body))))
 
 (setf (macro-function 'nslet)

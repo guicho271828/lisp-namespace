@@ -3,6 +3,7 @@
 (define-namespace namespace %namespace nil "A namespace for managing namespaces themselves.")
 
 (defun clear-namespace (name)
+  "Get rid of all values bound in the given namespaces."
   (assert (gethash name *namespace-table*))
   (clrhash (symbol-value (%namespace-hash (gethash name *namespace-table*))))
   name)

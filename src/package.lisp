@@ -1,26 +1,22 @@
 
-#|
-
-This file provide additional namespace for lisp.
-
-Common lisp is lisp-2, which means it has a different namespaces for the
-value and the function. With lisp-n, you can define arbitrary additional
-namespaces and its accessors as well.
-
-The idea is simple.  Common lisp has `symbol-value' and `symbol-function',
-so I added `symbol-anything-you-like'.  Current implementation is
-built upon a hashtable, but it also modifies `cl:symbol-plist', for the
-debugging purpose. I assume there won't be so many additional namespaces.
-
-|#
-
 (defpackage :lisp-namespace
   (:use :cl :alexandria)
   (:nicknames :lispn)
   (:export :define-namespace
            :clear-namespace
            :namespace-let
-           :nslet))
+           :nslet)
+  (:documentation "
+This package provides a method to define additional namespaces for lisp.
+
+Common lisp is lisp-2, which means it has a different namespaces for the
+value and the function. With lisp-namespace, you can define arbitrary additional
+namespaces and its accessors as well.
+
+The idea is simple.  Common lisp has `symbol-value' and `symbol-function',
+so I added `symbol-anything-you-like'.  Current implementation is
+built on a hashtable.
+"))
 
 (in-package :lispn)
 
@@ -68,6 +64,15 @@ debugging purpose. I assume there won't be so many additional namespaces.
                                    (expected-type t)
                                    (namespace-let t)
                                    (documentation ""))
+  "This macro defines a namespace. For the given name of namespace X,
+DEFINE-NAMESPACE defines 4 functions/macros:
+
++ #'SYMBOL-X, #'(setf SYMBOL-X) : accessor to the global binding. Optionally,
+  EXPECTED-TYPE provides FTYPE proclamation and results in the
+  better optimization. EXPECTED-TYPE is not evaluated.
++ #'X-BOUNDP : unary function returning a boolean
++ condition UNBOUND-X which is signaled when trying to access the value of an unbounded symbol.
++ macro (X-LET (binding...) body) : lexical binding. It is defined when BINDING is non-nil. "
   (when (member name '(function
                        macrolet
                        name
