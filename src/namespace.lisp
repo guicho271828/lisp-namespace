@@ -9,6 +9,8 @@
 
 #+clisp
 (format *error-output* "On CLISP, we cannot add method to DESCRIBE-OBJECT, so you cannot enjoy extended documentations for various namespaces")
+#+lispworks
+(format *error-output* "On Lispworks, we cannot add method to DESCRIBE-OBJECT, so you cannot enjoy extended documentations for various namespaces")
 
 #-(or clisp lispworks) ;; Lispworks complains about redefining existing describe-object method. Let's continue.
 (defmethod describe-object :after ((x symbol) s)
