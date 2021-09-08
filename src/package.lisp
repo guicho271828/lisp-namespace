@@ -20,6 +20,13 @@ built on a hashtable.
 
 (in-package :lispn)
 
+;; patch for Allegro CL Modern Mode
+;; https://franz.com/support/documentation/current/doc/case.htm#modern-mode-1
+(defun keep-upcase-or-preserve (str)
+  (if (eq :UPCASE (readtable-case *readtable*))
+      str
+      (string-downcase str)))
+
 ;; the name of this variable shoud not be changed, to maintain consistency
 ;; to the hash tables defined by define-namespace.
 (defvar *namespace-hash* (make-hash-table :test 'eq))
@@ -27,13 +34,13 @@ built on a hashtable.
             (:constructor %namespace
                           (name
                            &aux
-                           (accessor  (symbolicate "SYMBOL-" name))
-                           (hash      (symbolicate "*" name "-TABLE*"))
-                           (condition (symbolicate "UNBOUND-" name))
-                           (boundp    (symbolicate name "-BOUNDP"))
-                           (type      (symbolicate name "-TYPE"))
-                           (letname   (symbolicate name "-LET"))
-                           (doc-table (symbolicate "*" name "-DOC-TABLE*")))))
+                             (accessor  (symbolicate (keep-upcase-or-preserve "SYMBOL-") name))
+                             (hash      (symbolicate "*" name (keep-upcase-or-preserve "-TABLE*")))
+                             (condition (symbolicate (keep-upcase-or-preserve "UNBOUND-") name))
+                             (boundp    (symbolicate name (keep-upcase-or-preserve "-BOUNDP")))
+                             (type      (symbolicate name (keep-upcase-or-preserve "-TYPE")))
+                             (letname   (symbolicate name (keep-upcase-or-preserve "-LET")))
+                             (doc-table (symbolicate "*" name (keep-upcase-or-preserve "-DOC-TABLE*"))))))
   (name      (error "anonymous namespace?")   :type symbol :read-only t)
   (accessor  nil :type symbol :read-only t)
   (hash      nil :type symbol :read-only t) ;; default values are fed by the constructor above
