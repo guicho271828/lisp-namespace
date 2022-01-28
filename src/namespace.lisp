@@ -1,32 +1,57 @@
-(in-package :lispn)
+;;;; This file is a part of LISP-NAMESPACE.
+;;;; Copyright (c) 2015 Masataro Asai (guicho2.71828@gmail.com),
+;;;;               2022 Michał "phoe" Herda (phoe@disroot.org)
 
-(define-namespace namespace %namespace nil "A namespace for managing namespaces themselves.")
+(in-package #:lisp-namespace)
 
-(defun clear-namespace (name)
-  "Get rid of all values bound in the given namespaces."
-  (assert (gethash name *namespace-table*))
-  (clrhash (symbol-value (%namespace-hash (gethash name *namespace-table*))))
-  name)
+(defstruct (namespace (:constructor %make-namespace))
+  (name                nil :type symbol :read-only t)
+  (name-type           nil :type t      :read-only t)
+  (value-type          nil :type t      :read-only t)
+  ;; TODO add a way to have ERRORP in accessors
+  (accessor            nil :type symbol :read-only t)
+  (condition-name      nil :type symbol :read-only t)
+  (type-name           nil :type symbol :read-only t)
+  (let-name            nil :type symbol :read-only t)
+  (makunbound-symbol   nil :type symbol :read-only t)
+  (boundp-symbol       nil :type symbol :read-only t)
+  (hash-table          (make-hash-table :test #'eq) :type hash-table)
+  (documentation-table (make-hash-table :test #'eq) :type hash-table))
 
-#+clisp
-(format *error-output* "On CLISP, we cannot add method to DESCRIBE-OBJECT, so you cannot enjoy extended documentations for various namespaces")
-#+lispworks
-(format *error-output* "On Lispworks, we cannot add method to DESCRIBE-OBJECT, so you cannot enjoy extended documentations for various namespaces")
+(defun make-namespace
+    (name &key
+            (accessor (symbolicate '#:symbol- name))
+            (condition-name (symbolicate '#:unbound- name))
+            (type-name (symbolicate name '#:-type))
+            (let-name (symbolicate name '#:-let))
+            (makunbound-symbol (symbolicate name '#:-makunbound))
+            (boundp-symbol (symbolicate name '#:-boundp))
+            (hash-table-test #'eq)
+            (name-type 'symbol)
+            (value-type 't))
+  (%make-namespace
+   :name name :name-type name-type :value-type value-type
+   :accessor accessor
+   :condition-name condition-name :type-name type-name
+   :let-name let-name :makunbound-symbol makunbound-symbol
+   :boundp-symbol boundp-symbol
+   :hash-table (make-hash-table :test hash-table-test)
+   :documentation-table (make-hash-table :test hash-table-test)))
 
-#-(or clisp lispworks) ;; Lispworks complains about redefining existing describe-object method. Let's continue.
-(defmethod describe-object :after ((x symbol) s)
-  (let ((*print-pretty* t))
-    (pprint-logical-block (s nil)
-      (maphash (lambda (name ns)
-                 (when (funcall (%namespace-boundp ns) x)
-                   (pprint-logical-block (s nil)
-                     (format s "~@:_Symbol ~S is bound in a namespace ~S:" x name)
-                     (pprint-indent :block 2 s)
-                     (format s "~@:_Value: ~S" (funcall (%namespace-accessor ns) x))
-                     (if-let ((doc (documentation x name)))
-                             (progn
-                               (format s "~@:_Documentation: ~@:_")
-                               (pprint-logical-block (s nil :per-line-prefix "  ")
-                                 (princ doc s)))
-                             (format s "~@:_(undocumented)")))))
-               *namespace-table*))))
+(defmethod print-object ((namespace namespace) stream)
+  (print-unreadable-object (namespace stream :type t)
+    (format stream "~S (~D binding~:*~P)"
+            (namespace-name namespace)
+            (hash-table-count (namespace-hash-table namespace)))))
+
+(defvar *namespaces* (make-namespace 'namespace :value-type 'namespace))
+
+(defun ensure-namespace (name &rest args)
+  (let ((hash-table (namespace-hash-table *namespaces*)))
+    (multiple-value-bind (value foundp) (gethash name hash-table)
+      (if foundp
+          value
+          (apply #'make-namespace name args)))))
+
+(setf *namespaces* (ensure-namespace 'namespace :value-type 'namespace)
+      (gethash 'namespace (namespace-hash-table *namespaces*)) *namespaces*)
