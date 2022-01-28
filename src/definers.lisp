@@ -4,14 +4,6 @@
 
 (in-package #:lisp-namespace)
 
-;; TODO why do we even care about this?
-;;      The whole *FOO-TABLE* variable-making was undocumented.
-;; (defun make-hash-table-symbol-macro (namespace)
-;;   (let* ((name (namespace-name namespace))
-;;          (variable-name (symbolicate '#:* name '#:-table*)))
-;;     `((define-symbol-macro ,variable-name
-;;           (namespace-hash-table (symbol-namespace ',name))))))
-
 (defun make-proclamations (namespace)
   (let ((name-type (namespace-name-type namespace))
         (accessor (namespace-accessor namespace))
@@ -51,8 +43,6 @@
       `((deftype ,type-name () ',value-type)))))
 
 (defun read-evaluated-form ()
-  "Queries the user for a single form to be evaluated, then reads and evaluates
-that form."
   (format *query-io* "~&;; Type a form to be evaluated:~%")
   (list (eval (read *query-io*))))
 
@@ -110,16 +100,6 @@ that form."
                (hash-table (namespace-hash-table namespace)))
           (remhash name hash-table)
           name)))))
-
-;; TODO remove this altogether
-;; (defun make-namespace-let-forms (namespace)
-;;   (let ((name (namespace-name namespace))
-;;         (let-name (namespace-let-name namespace)))
-;;     `((defmacro ,let-name (bindings &body body)
-;;         "Automatically defined local binding macro."
-;;         (flet ((process-binding (bind) `((,',name ,(car bind)) ,@(cdr bind))))
-;;           `(namespace-let ,(mapcar #'process-binding bindings)
-;;              ,@body))))))
 
 (defun make-documentation-forms (namespace documentation)
   (let ((name (namespace-name namespace)))

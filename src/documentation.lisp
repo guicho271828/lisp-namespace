@@ -29,28 +29,6 @@ DEFINE-NAMESPACE defines 4 functions/macros:
  (documentation 'clear-namespace 'function)
  "Get rid of all values bound in the given namespace."
  (documentation 'namespace 'namespace)
- "A namespace for managing namespaces."
- ;; TODO: remove this altogether
- ;; (documentation 'namespace-let 'function)
- ;;  #1="Bindings is a list of bindings where each car is of form (NAMESPACE NAME),
- ;;  or a symbol NAME for a variable namespace.
-
- ;;  function, macro, label, symbol-macro, handler, restart is by default
- ;;  recognized as a namespace.
-
- ;; Example:
- ;; (namespace-let ((#'x (y) (1+ y)) ; -- equivalent to ((function x) (y) (1+ y))
- ;;                 ((macro x) (y) (1+ y))
- ;;                 ((macro y) (y) (1+ y))
- ;;                 (#'x (y) (1+ y))
- ;;                 ((label y) (y) (y y))
- ;;                 ((symbol-macro sm) 0)
- ;;                 (b 0))
- ;;   (let ((b 1))
- ;;     (print :x)))
- ;; "
- ;;  (documentation 'nslet 'function)
- ;;  #1#
- )
+ "A namespace for managing namespaces.")
 
 ;; TODO all exports

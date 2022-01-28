@@ -9,10 +9,6 @@
    ;; Macros and utility functions
    #:define-namespace
    #:clear-namespace
-   ;; TODO: get rid of NAMESPACE-LET and NSLET since they're just
-   ;;       way too buggy and quite possibly unused
-   ;; #:namespace-let
-   ;; #:nslet
    ;; Namespace structure accessors
    #:namespace
    #:namespace-name
@@ -21,8 +17,6 @@
    #:namespace-accessor
    #:namespace-condition-name
    #:namespace-type-name
-   ;; TODO get rid of NAMESPACE-LET-NAME along with the above
-   ;; #:namespace-let-name
    #:namespace-makunbound-symbol
    #:namespace-boundp-symbol
    #:namespace-hash-table

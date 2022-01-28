@@ -12,7 +12,6 @@
   (accessor            nil :type symbol :read-only t)
   (condition-name      nil :type symbol :read-only t)
   (type-name           nil :type symbol :read-only t)
-  (let-name            nil :type symbol :read-only t)
   (makunbound-symbol   nil :type symbol :read-only t)
   (boundp-symbol       nil :type symbol :read-only t)
   (hash-table          (make-hash-table :test #'eq) :type hash-table)
@@ -23,7 +22,6 @@
             (accessor (symbolicate '#:symbol- name))
             (condition-name (symbolicate '#:unbound- name))
             (type-name (symbolicate name '#:-type))
-            (let-name (symbolicate name '#:-let))
             (makunbound-symbol (symbolicate name '#:-makunbound))
             (boundp-symbol (symbolicate name '#:-boundp))
             (hash-table-test #'eq)
@@ -33,8 +31,7 @@
    :name name :name-type name-type :value-type value-type
    :accessor accessor
    :condition-name condition-name :type-name type-name
-   :let-name let-name :makunbound-symbol makunbound-symbol
-   :boundp-symbol boundp-symbol
+   :makunbound-symbol makunbound-symbol :boundp-symbol boundp-symbol
    :hash-table (make-hash-table :test hash-table-test)
    :documentation-table (make-hash-table :test hash-table-test)))
 

@@ -21,8 +21,6 @@
                (:file "define-namespace-long")
                (:file "define-namespace")
                (:file "describe-object")
-               ;; TODO: remove this altogether
-               ;; (:file "namespace-let")
                (:file "documentation"))
   :description "Utilities for extensible namespaces in Common Lisp."
   :in-order-to ((test-op (load-op #:lisp-namespace/test)))

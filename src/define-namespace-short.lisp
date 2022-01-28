@@ -31,16 +31,12 @@
        (setf (gethash ',name (namespace-hash-table *namespaces*))
              (ensure-namespace ',name :value-type ',value-type))
        ,@(make-proclamations namespace)
-       ;; TODO this is possibly unnecessary
-       ;; ,@(make-hash-table-symbol-macro namespace)
        ,@(make-unbound-condition-forms namespace)
        ,@(make-type-forms namespace)
        ,@(make-reader-forms namespace)
        ,@(make-writer-forms namespace)
        ,@(make-boundp-forms namespace)
        ,@(make-makunbound-forms namespace)
-       ;; TODO remove this altogether
-       ;; ,@(when generate-let-p (make-namespace-let-forms namespace))
        ,@(make-documentation-forms namespace documentation)
        (symbol-namespace ',name))))
 
