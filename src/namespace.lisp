@@ -15,6 +15,7 @@
   (type-name                 nil :type symbol  :read-only t)
   (makunbound-symbol         nil :type symbol  :read-only t)
   (boundp-symbol             nil :type symbol  :read-only t)
+  ;; TODO use these three in the definers and the long form
   (error-when-not-found-p    t   :type boolean :read-only t)
   (errorp-arg-in-accessor-p  nil :type boolean :read-only t)
   (default-arg-in-accessor-p t   :type boolean :read-only t)

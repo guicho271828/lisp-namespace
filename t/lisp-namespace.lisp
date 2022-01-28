@@ -144,3 +144,5 @@
 ;; TODO long form missing functions test
 
 ;; TODO tests for definition errors
+
+;; TODO test DEFAULT and ERRORP in writer functions

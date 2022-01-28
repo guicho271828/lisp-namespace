@@ -4,25 +4,12 @@
 
 (in-package #:lisp-namespace)
 
-;; TODO export these functions to some shared file
-
-(defun check-name-not-in-cl-package (name)
-  (when (eq (symbol-package name) (find-package :common-lisp))
-    (error "~S is a standard Common Lisp symbol and it cannot be used ~
-            as a namespace name." name)))
-
-(defun check-redefine-meta-namespace (name)
-  (when (eq name 'namespace)
-    (unless (eq *package* (find-package '#:lisp-namespace))
-      (cerror "Redefine the namespace."
-              "Attempting to redefine namespace NAMESPACE."))))
-
 (defun %define-namespace-short-form (name &optional
                                             (value-type 't)
                                             (letp t letpp)
                                             documentation)
   (when (and letpp letp)
-    (warn "Deprecated option BINDING provided to DEFINE-NAMESPACE: ~
+    (warn "Deprecated option BINDING true in DEFINE-NAMESPACE: ~
            no binding form was generated."))
   (check-name-not-in-cl-package name)
   (check-redefine-meta-namespace name)

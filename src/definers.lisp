@@ -4,6 +4,8 @@
 
 (in-package #:lisp-namespace)
 
+;;; Minor forms
+
 (defun make-proclamations (namespace)
   (let ((name-type (namespace-name-type namespace))
         (accessor (namespace-accessor namespace))
@@ -46,60 +48,26 @@
   (format *query-io* "~&;; Type a form to be evaluated:~%")
   (list (eval (read *query-io*))))
 
-(defun make-reader-forms (namespace)
-  (let ((name (namespace-name namespace))
-        (accessor (namespace-accessor namespace))
-        (condition (namespace-condition-name namespace)))
-    `((defun ,accessor (name &optional (default nil defaultp))
-        ,(format nil "Automatically defined reader function.~%~
-                      When DEFAULT is supplied, the value is set automatically ~
-                      if the symbol is not bound in the namespace.")
-        ;; We need special treatment for namespace NAMESPACE in order to break
-        ;; the metacycle in #'SYMBOL-NAMESPACE.
-        (let* ((namespace ,(if (eq name 'namespace)
-                               '*namespaces*
-                               `(symbol-namespace ',name)))
-               (hash-table (namespace-hash-table namespace)))
-          (multiple-value-bind (value foundp) (gethash name hash-table)
-            (cond (foundp value)
-                  (defaultp (setf (gethash name hash-table) default))
-                  (t (restart-case (error ',condition :name name)
-                       (use-value (newval)
-                         :report "Use specified value."
-                         :interactive read-evaluated-form
-                         newval)
-                       (store-value (newval)
-                         :report "Set specified value and use it."
-                         :interactive read-evaluated-form
-                         (setf (gethash name hash-table) newval)))))))))))
-
-(defun make-writer-forms (namespace)
-  (let ((name (namespace-name namespace))
-        (accessor (namespace-accessor namespace)))
-    `((defun (setf ,accessor) (new-value name)
-        "Automatically defined writer function."
-        (let* ((namespace (symbol-namespace ',name))
-               (hash-table (namespace-hash-table namespace)))
-          (setf (gethash name hash-table) new-value))))))
-
 (defun make-boundp-forms (namespace)
   (let ((name (namespace-name namespace))
         (boundp (namespace-boundp-symbol namespace)))
-    `((defun ,boundp (name)
-        "Automatically defined boundp function."
-        (let* ((namespace (symbol-namespace ',name))
-               (hash-table (namespace-hash-table namespace)))
-          (nth-value 1 (gethash name hash-table)))))))
+    (when boundp
+      `((defun ,boundp (name)
+          "Automatically defined boundp function."
+          (let* ((namespace (symbol-namespace ',name))
+                 (hash-table (namespace-hash-table namespace)))
+            (nth-value 1 (gethash name hash-table))))))))
 
 (defun make-makunbound-forms (namespace)
   (let ((name (namespace-name namespace))
         (makunbound (namespace-makunbound-symbol namespace)))
-    `((defun ,makunbound (name)
-        "Automatically defined makunbound function."
-        (let* ((namespace (symbol-namespace ',name))
-               (hash-table (namespace-hash-table namespace)))
-          (remhash name hash-table)
-          name)))))
+    (when makunbound
+      `((defun ,makunbound (name)
+          "Automatically defined makunbound function."
+          (let* ((namespace (symbol-namespace ',name))
+                 (hash-table (namespace-hash-table namespace)))
+            (remhash name hash-table)
+            name))))))
 
 (defun make-documentation-forms (namespace documentation)
   (let ((name (namespace-name namespace)))
@@ -114,3 +82,45 @@
               (setf (gethash name doc-table) newdoc))))
       ,@(when documentation
           `((setf (documentation ',name 'namespace) ,documentation))))))
+
+;;; Reader forms
+
+(defun make-reader-forms (namespace)
+  (let ((name (namespace-name namespace))
+        (accessor (namespace-accessor namespace))
+        (condition (namespace-condition-name namespace)))
+    (when accessor
+      `((defun ,accessor (name &optional (default nil defaultp))
+          ,(format nil "Automatically defined reader function.~%~
+                      When DEFAULT is supplied, the value is set automatically ~
+                      if the symbol is not bound in the namespace.")
+          ;; We need special treatment for namespace NAMESPACE in order to break
+          ;; the metacycle in #'SYMBOL-NAMESPACE.
+          (let* ((namespace ,(if (eq name 'namespace)
+                                 '*namespaces*
+                                 `(symbol-namespace ',name)))
+                 (hash-table (namespace-hash-table namespace)))
+            (multiple-value-bind (value foundp) (gethash name hash-table)
+              (cond (foundp value)
+                    (defaultp (setf (gethash name hash-table) default))
+                    (t (restart-case (error ',condition :name name)
+                         (use-value (newval)
+                           :report "Use specified value."
+                           :interactive read-evaluated-form
+                           newval)
+                         (store-value (newval)
+                           :report "Set specified value and use it."
+                           :interactive read-evaluated-form
+                           (setf (gethash name hash-table) newval))))))))))))
+
+;;; Writer foms
+
+(defun make-writer-forms (namespace)
+  (let ((name (namespace-name namespace))
+        (accessor (namespace-accessor namespace)))
+    (when accessor
+      `((defun (setf ,accessor) (new-value name)
+          "Automatically defined writer function."
+          (let* ((namespace (symbol-namespace ',name))
+                 (hash-table (namespace-hash-table namespace)))
+            (setf (gethash name hash-table) new-value)))))))

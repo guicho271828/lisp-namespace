@@ -17,17 +17,19 @@
   :components ((:file "package")
                (:file "namespace")
                (:file "definers")
-               (:file "define-namespace-short")
-               (:file "define-namespace-long")
-               (:file "define-namespace")
+               (:module "define-namespace"
+                :components ((:file "common")
+                             (:file "short")
+                             (:file "long")
+                             (:file "macro")))
                (:file "describe-object")
                (:file "documentation"))
   :description "Utilities for extensible namespaces in Common Lisp."
   :in-order-to ((test-op (load-op #:lisp-namespace/test)))
   :perform (test-op (op c)
-             (let ((suite-name (find-symbol (symbol-name '#:lisp-namespace)
-                                            '#:lisp-namespace/test)))
-               (uiop:symbol-call '#:5am '#:run! suite-name))))
+             (uiop:symbol-call '#:5am '#:run!
+                               (find-symbol (symbol-name '#:lisp-namespace)
+                                            '#:lisp-namespace/test))))
 
 (defsystem #:lisp-namespace/test
   :author ("Masataro Asai <guicho2.71828@gmail.com>"
