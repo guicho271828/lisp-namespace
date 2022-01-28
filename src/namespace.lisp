@@ -4,18 +4,22 @@
 
 (in-package #:lisp-namespace)
 
+(deftype unbound-behavior () '(member :error :errorp))
+
 (defstruct (namespace (:constructor %make-namespace))
-  (name                nil :type symbol :read-only t)
-  (name-type           nil :type t      :read-only t)
-  (value-type          nil :type t      :read-only t)
-  ;; TODO add a way to have ERRORP in accessors
-  (accessor            nil :type symbol :read-only t)
-  (condition-name      nil :type symbol :read-only t)
-  (type-name           nil :type symbol :read-only t)
-  (makunbound-symbol   nil :type symbol :read-only t)
-  (boundp-symbol       nil :type symbol :read-only t)
-  (hash-table          (make-hash-table :test #'eq) :type hash-table)
-  (documentation-table (make-hash-table :test #'eq) :type hash-table))
+  (name                      nil :type symbol  :read-only t)
+  (name-type                 nil :type t       :read-only t)
+  (value-type                nil :type t       :read-only t)
+  (accessor                  nil :type symbol  :read-only t)
+  (condition-name            nil :type symbol  :read-only t)
+  (type-name                 nil :type symbol  :read-only t)
+  (makunbound-symbol         nil :type symbol  :read-only t)
+  (boundp-symbol             nil :type symbol  :read-only t)
+  (error-when-not-found-p    t   :type boolean :read-only t)
+  (errorp-arg-in-accessor-p  nil :type boolean :read-only t)
+  (default-arg-in-accessor-p t   :type boolean :read-only t)
+  (hash-table                (make-hash-table :test #'eq) :type hash-table)
+  (documentation-table       (make-hash-table :test #'eq) :type hash-table))
 
 (defun make-namespace
     (name &key
@@ -26,14 +30,20 @@
             (boundp-symbol (symbolicate name '#:-boundp))
             (hash-table-test #'eq)
             (name-type 'symbol)
-            (value-type 't))
+            (value-type 't)
+            (error-when-not-found-p t)
+            (errorp-arg-in-accessor-p nil)
+            (default-arg-in-accessor-p t))
   (%make-namespace
    :name name :name-type name-type :value-type value-type
    :accessor accessor
    :condition-name condition-name :type-name type-name
    :makunbound-symbol makunbound-symbol :boundp-symbol boundp-symbol
    :hash-table (make-hash-table :test hash-table-test)
-   :documentation-table (make-hash-table :test hash-table-test)))
+   :documentation-table (make-hash-table :test hash-table-test)
+   :error-when-not-found-p error-when-not-found-p
+   :errorp-arg-in-accessor-p errorp-arg-in-accessor-p
+   :default-arg-in-accessor-p default-arg-in-accessor-p))
 
 (defmethod print-object ((namespace namespace) stream)
   (print-unreadable-object (namespace stream :type t)

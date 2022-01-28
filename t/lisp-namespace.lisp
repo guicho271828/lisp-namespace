@@ -31,7 +31,7 @@
     (is (eq ns1 ns5))
     (is (eq ns1 ns6))))
 
-(test namespace-accessors
+(test meta-namespace
   (let ((namespace *namespaces*))
     ;; Name
     (is (eq 'namespace (namespace-name namespace)))
@@ -77,7 +77,7 @@
       (is (string= "A namespace for managing namespaces."
                    (gethash 'namespace documentation-table))))))
 
-(test custom-namespace
+(test define-namespace-short-form
   ;; NOTE: HANDLER-BIND is to muffle redefinition warnings which may happen
   ;;       when reevaluating DEFINE-NAMESPACE when running the test suite
   ;;       multiple times in a single Lisp image.
@@ -136,3 +136,11 @@
     (let ((documentation-table (namespace-documentation-table namespace)))
       (is (hash-table-p documentation-table))
       (is (string= "A thing." (gethash 'this-thing documentation-table))))))
+
+;; TODO tests for reader restarts
+
+;; TODO long form test
+
+;; TODO long form missing functions test
+
+;; TODO tests for definition errors

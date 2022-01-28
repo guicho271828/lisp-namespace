@@ -26,7 +26,7 @@
            no binding form was generated."))
   (check-name-not-in-cl-package name)
   (check-redefine-meta-namespace name)
-  (let* ((namespace (ensure-namespace name :value-type value-type)))
+  (let ((namespace (ensure-namespace name :value-type value-type)))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
        (setf (gethash ',name (namespace-hash-table *namespaces*))
              (ensure-namespace ',name :value-type ',value-type))
