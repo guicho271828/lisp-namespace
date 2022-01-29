@@ -325,6 +325,7 @@
                                :type-name nil
                                :documentation-type nil
                                :condition-name nil
+                               :hash-table-test nil
                                :error-when-not-found-p nil
                                :errorp-arg-in-accessor-p nil
                                :default-arg-in-accessor-p nil))
@@ -342,7 +343,7 @@
             namespace-makunbound-symbol nil
             namespace-boundp-symbol nil
             namespace-documentation-type nil
-            namespace-hash-table-test 'eq
+            namespace-hash-table-test nil
             namespace-error-when-not-found-p nil
             namespace-errorp-arg-in-accessor-p nil
             namespace-default-arg-in-accessor-p nil
