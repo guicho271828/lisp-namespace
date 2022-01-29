@@ -10,16 +10,51 @@ Don't use it yet - it's volatile software that changes by the minute.
 
 ## Manual
 
-### `NAME-TYPE`
+A namespace is a second-class concept in Common Lisp and refers to concept that allows to associate names of some sort with objects of some sort.
 
-By default, names are symbols and compared via `EQ`. It is possible to customize this though and get e.g. a namespace in which names are non-negative numbers:
+Common Lisp has a lot of namespaces:
+* 1) variables/symbol macros
+* 2) functions/macros
+* 3) classes/conditions/types
+* 4) method combinations
+* 5) block names
+* 6) catch tags
+* 7) tagbody tags
+* 8) restarts
+* 9) packages
+* 10) compiler macros
+* 11) slot names 
+* ...
+* n) ASDF systems
+* n+1) ... (people can make new ones!)
+
+This system is a utility to bring a first-class implementation of the concept of namespaces along with utilities to customize and manage them.
+
+The heart of the facility is the `DEFINE-NAMESPACE` macro, which comes in two forms: short (syntax-compatible with [`LISP-NAMESPACE:DEFINE-NAMESPACE`](https://github.com/guicho271828/lisp-namespace) and with mostly compatible effects) and long form (allowing for greater behavior customization). `DEFINE-NAMESPACE`, by default, generates functions for accessing the namespace, a condition signaled whenever an access to an unbound name is attempted, a type which denotes the values permissible in a namespace, and documentation types.
+
+By default, names are symbols and compared via `EQ`. This behavior is consistent with the way Common Lisp names variables and classes.
+
+```lisp
+IN-NOMINE> (define-namespace thing)
+#<NAMESPACE THING (0 bindings)>
+
+IN-NOMINE> (setf (symbol-thing 'foo) 42
+                 (symbol-thing 'bar) :keyword 
+                 (symbol-thing 'baz) *readtable*)
+#<READTABLE {1000022CA3}>
+
+IN-NOMINE> (mapcar #'symbol-thing '(foo bar baz))
+(42 :KEYWORD #<READTABLE {1000022CA3}>)
+```
+
+It is possible to customize this behavior, though, and get e.g. a namespace in which names are non-negative numbers.
 
 ```lisp
 IN-NOMINE> (define-namespace player
              ;; Use numbers as hash table keys
              :name-type unsigned-byte
              ;; Numbers are EQL-comparable
-             :hash-table-test 'eql
+             :hash-table-test eql
              :accessor player-no)
 #<NAMESPACE PLAYER (0 bindings)>
 
@@ -41,6 +76,39 @@ It is possible to utilize different name types along with all four standard hash
 * `EQL` for numbers and characters,
 * `EQUAL` for strings or lists,
 * `EQUALP` for strings without case sensitivity.
+
+In Nomine by default provides documentation types with the same names as namespace names.
+
+```lisp
+IN-NOMINE> (setf (documentation 8 'player) "The best player ever.")
+"The best player ever."
+
+IN-NOMINE> (documentation 8 'player)
+"The best player ever."
+```
+
+In addition, In Nomine hooks into implementation-defined `CL:DESCRIBE` in order to provide information about namespace bindings.
+
+```lisp
+IN-NOMINE> (describe 'foo)
+IN-NOMINE::FOO
+  [symbol]
+
+Symbol FOO is bound in namespace THING:
+  Value: 42
+  (undocumented)
+; No value
+
+IN-NOMINE> (describe 8)
+8
+  [fixnum]
+
+8 is bound in namespace PLAYER:
+  Value: :JERRY
+  Documentation:
+    The best player ever.
+; No value
+```
 
 ## API
 
