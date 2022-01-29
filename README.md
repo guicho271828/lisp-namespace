@@ -31,6 +31,8 @@ Common Lisp has a lot of namespaces:
 * 9\) packages
 * 10\) compiler macros
 * 11\) slot names 
+* 12\) logical hosts
+* 13\) character names
 * ...
 * n) ASDF systems
 * n+1) ... (people can make new ones!)
