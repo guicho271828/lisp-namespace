@@ -11,12 +11,20 @@
   (:import-from #:in-nomine
                 #:*namespaces*
                 #:ensure-namespace)
+  (:import-from #:alexandria
+                #:ignore-some-conditions)
+  (:import-from #:introspect-environment
+                #:typexpand-1)
+  (:import-from #:closer-mop
+                #:intern-eql-specializer)
   (:export #:in-nomine))
 
 (in-package #:in-nomine/test)
 
 (def-suite in-nomine)
 (in-suite in-nomine)
+
+;;; Internal structure tests
 
 (test internal-structure
   (let* ((ns1 *namespaces*)
@@ -31,10 +39,12 @@
     (is (eq ns1 ns5))
     (is (eq ns1 ns6))))
 
+;;; Metanamespace
+
 (defmacro with-namespace ((name value) &body body)
-  ;; NOTE: HANDLER-BIND is to muffle any redefinition warnings which may happen
-  ;;       when reevaluating DEFINE-NAMESPACE when running the test suite
-  ;;       multiple times in a single Lisp image.
+  ;; NOTE: HANDLER-BIND is here to muffle any redefinition warnings which may
+  ;;       happen when reevaluating DEFINE-NAMESPACE, which may happen when
+  ;;       running the test suite multiple times in a row.
   `(let ((,name (handler-bind ((warning #'muffle-warning)) ,value)))
      ,@body))
 
@@ -81,11 +91,12 @@
       (is (eq 't errorp)
           (eq 'nil errorpp)
           (eq 't defaultp)))
-    ;; Hash table
-    (let ((hash-table (namespace-binding-table namespace)))
-      (is (hash-table-p hash-table))
-      (is (eq namespace (gethash 'namespace hash-table))))
-    ;; Docstrings for namespaces are managed by namespace objects themselves.
+    ;; Binding table
+    (let ((binding-table (namespace-binding-table namespace)))
+      (is (hash-table-p binding-table))
+      (is (eq namespace (gethash 'namespace binding-table))))
+    ;; Docstrings for namespaces are managed by namespace objects themselves,
+    ;; hence both documentation type and table are meant to be null.
     (progn
       (let ((documentation-type (namespace-documentation-type namespace)))
         (is (null documentation-type)))
@@ -96,6 +107,8 @@
                  (documentation 'namespace 'namespace)))
     (is (string= "A namespace for managing namespaces."
                  (documentation namespace 't)))))
+
+;;; Short form tests
 
 (test short-form
   (with-namespace (namespace (define-namespace thing keyword nil
@@ -117,11 +130,11 @@
           (signals unbound-thing
             (handler-bind ((unbound-thing #'verify-cell-error-name))
               (funcall (funcall accessor 'that-thing)))))
-        ;; Hash table
-        (let ((hash-table (namespace-binding-table namespace)))
-          (is (hash-table-p hash-table))
-          (is (eq 'eq (hash-table-test hash-table)))
-          (is (eq :thing (gethash 'this-thing hash-table))))
+        ;; Binding table
+        (let ((binding-table (namespace-binding-table namespace)))
+          (is (hash-table-p binding-table))
+          (is (eq 'eq (hash-table-test binding-table)))
+          (is (eq :thing (gethash 'this-thing binding-table))))
         ;; Boundp
         (let ((boundp-symbol (namespace-boundp-symbol namespace)))
           (is (eq 'thing-boundp boundp-symbol))
@@ -176,26 +189,7 @@
     (is (string= "A thing namespace." (documentation namespace 't)))
     (clear-namespace 'thing)))
 
-(test short-form-deprecation-warning
-  (block nil
-    (flet ((handle (condition)
-             (is (typep condition 'warning))
-             (is (string= (princ-to-string condition)
-                          (format nil "Deprecated option BINDING true in ~
-                                       DEFINE-NAMESPACE: no binding form ~
-                                       was generated.")))
-             (return-from nil)))
-      (handler-bind ((warning #'handle))
-        (macroexpand-1 '(define-namespace test-warning-namespace t t)))
-      (error "Test failure: no warning was signaled"))))
-
-(test long-form-default-values
-  (with-namespace (namespace (define-namespace default-values
-                               ;; A single keyword argument is required to trigger
-                               ;; the long form, hence :VALUE-TYPE T.
-                               :value-type t))
-    ;; TODO test default values of long form
-    namespace))
+;;; Long form tests
 
 (test long-form-customized
   (with-namespace (namespace (define-namespace stuff
@@ -229,10 +223,10 @@
           (signals not-enough-stuff
             (handler-bind ((not-enough-stuff #'verify-cell-error-name))
               (funcall (funcall accessor "key-2")))))
-        ;; Hash table
-        (let ((hash-table (namespace-binding-table namespace)))
-          (is (hash-table-p hash-table))
-          (is (eq "value-1" (gethash "key-1" hash-table))))
+        ;; Binding table
+        (let ((binding-table (namespace-binding-table namespace)))
+          (is (hash-table-p binding-table))
+          (is (eq "value-1" (gethash "key-1" binding-table))))
         ;; Boundp
         (let ((boundp-symbol (namespace-boundp-symbol namespace)))
           (is (eq 'stuff-exists-p boundp-symbol))
@@ -282,16 +276,127 @@
       (is (hash-table-p documentation-table))
       (is (string= "docs" (gethash "key" documentation-table))))))
 
-;; TODO test long form
+(test long-form-default-values
+  (with-namespace (namespace (define-namespace default
+                               ;; A single keyword argument is required to
+                               ;; trigger the long form.
+                               :documentation nil))
+    (macrolet ((frob (&rest args)
+                 (loop for (accessor expected) on args by #'cddr
+                       collect `(is (eq ,expected (,accessor namespace)))
+                         into result
+                       finally (return `(progn ,@result)))))
+      (frob namespace-name 'default
+            namespace-name-type 'symbol
+            namespace-value-type 't
+            namespace-accessor 'symbol-default
+            namespace-condition-name 'unbound-default
+            namespace-type-name 'default-type
+            namespace-makunbound-symbol 'default-makunbound
+            namespace-boundp-symbol 'default-boundp
+            namespace-documentation-type 'default
+            namespace-hash-table-test 'eq
+            namespace-error-when-not-found-p 't
+            namespace-errorp-arg-in-accessor-p 'nil
+            namespace-default-arg-in-accessor-p 't)
+      (let ((binding-table (namespace-binding-table namespace)))
+        (is (eq 'eq (hash-table-test binding-table)))
+        (is (= 0 (hash-table-count binding-table))))
+      (let ((documentation-table (namespace-documentation-table namespace)))
+        (is (eq 'eq (hash-table-test documentation-table)))
+        (is (= 0 (hash-table-count documentation-table))))
+      (let* ((specializers (list (find-class 't)
+                                 (intern-eql-specializer 'default)))
+             (method (find-method #'documentation '() specializers nil)))
+        (is (not (null method))))
+      (let* ((specializers (list (find-class 't)
+                                 (find-class 't)
+                                 (intern-eql-specializer 'default)))
+             (method (find-method #'(setf documentation) '() specializers nil)))
+        (is (not (null method)))))))
 
-;; TODO test long form null arguments
+(test long-form-null-values
+  (with-namespace (namespace (define-namespace empty
+                               :accessor nil
+                               :name-type nil
+                               :value-type nil
+                               :makunbound-symbol nil
+                               :boundp-symbol nil
+                               :type-name nil
+                               :documentation-type nil
+                               :condition-name nil
+                               :error-when-not-found-p nil
+                               :errorp-arg-in-accessor-p nil
+                               :default-arg-in-accessor-p nil))
+    (macrolet ((frob (&rest args)
+                 (loop for (accessor expected) on args by #'cddr
+                       collect `(is (eq ,expected (,accessor namespace)))
+                         into result
+                       finally (return `(progn ,@result)))))
+      (frob namespace-name 'empty
+            namespace-name-type nil
+            namespace-value-type nil
+            namespace-accessor nil
+            namespace-condition-name nil
+            namespace-type-name nil
+            namespace-makunbound-symbol nil
+            namespace-boundp-symbol nil
+            namespace-documentation-type nil
+            namespace-hash-table-test 'eq
+            namespace-error-when-not-found-p nil
+            namespace-errorp-arg-in-accessor-p nil
+            namespace-default-arg-in-accessor-p nil
+            namespace-binding-table nil
+            namespace-documentation-table nil)
+      (is (namespace-boundp 'empty))
+      (is (not (fboundp 'symbol-empty)))
+      (is (not (fboundp 'symbol-makunbound)))
+      (is (not (fboundp 'symbol-boundp)))
+      (flet ((type-boundp (x) (or (find-class x nil)
+                                  (nth-value 1 (typexpand-1 x)))))
+        (is (not (type-boundp 'empty-type)))
+        (is (not (type-boundp 'unbound-empty))))
+      (let* ((specializers (list (find-class 't)
+                                 (intern-eql-specializer 'empty)))
+             (method (find-method #'documentation '() specializers nil)))
+        (is (null method)))
+      (let* ((specializers (list (find-class 't)
+                                 (find-class 't)
+                                 (intern-eql-specializer 'empty)))
+             (method (find-method #'(setf documentation) '() specializers nil)))
+        (is (null method))))))
 
-;; TODO test definition errors
+;;; Condition tests
 
-;; TODO test ERROR-WHEN-NOT-FOUND-P
-;; TODO test ERROR-WHEN-NOT-FOUND-P with null CONDITION-NAME
+(test short-form-deprecation-warning
+  (multiple-value-bind (value condition)
+      (ignore-some-conditions (warning)
+        (macroexpand-1 `(define-namespace test-warning-namespace t t)))
+    (is (null value))
+    (is (typep condition 'warning))
+    (is (string= (princ-to-string condition)
+                 (format nil "Deprecated option BINDING true in ~
+                              DEFINE-NAMESPACE: no binding form was ~
+                              generated.")))))
 
-;; TODO test ERRORP-ARG-IN-ACCESSOR-P
-;; TODO test ERRORP-ARG-IN-ACCESSOR-P with null CONDITION-NAME
-
-;; TODO test DEFAULT-ARG-IN-ACCESSOR-P
+(test macroexpansion-time-errors
+  (multiple-value-bind (value condition)
+      (ignore-errors (macroexpand-1 `(define-namespace cl:car t)))
+    (is (null value))
+    (is (typep condition 'error))
+    (is (string= (princ-to-string condition)
+                 (format nil "~S is a standard Common Lisp symbol and it ~
+                              cannot be used as a namespace name."
+                         'cl:car))))
+  (multiple-value-bind (value condition)
+      (ignore-errors
+       (flet ((validate-restart (condition)
+                (let ((restart (find-restart 'continue condition)))
+                  (is (string= (princ-to-string restart)
+                               "Redefine the namespace.")))))
+         (handler-bind ((error #'validate-restart))
+           (macroexpand-1 `(define-namespace namespace t)))))
+    (is (null value))
+    (is (typep condition 'error))
+    (is (string= (princ-to-string condition)
+                 (format nil "Attempting to redefine namespace NAMESPACE.")))))

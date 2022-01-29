@@ -37,7 +37,12 @@
   :mailto "guicho2.71828@gmail.com"
   :description "test system for in-nomine"
   :license "LLGPL"
-  :depends-on (#:in-nomine #:uiop #:fiveam)
+  :depends-on (#:in-nomine
+               #:alexandria
+               #:uiop
+               #:fiveam
+               #:introspect-environment
+               #:closer-mop)
   :pathname "t"
   :components ((:file "in-nomine"))
   :serial t)
