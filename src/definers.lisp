@@ -13,29 +13,34 @@
          (makunbound (namespace-makunbound-symbol namespace))
          (type (namespace-type-name namespace))
          (errorp-arg-p (namespace-errorp-arg-in-accessor-p namespace))
-         (default-arg-p (namespace-default-arg-in-accessor-p namespace)))
-    `(,@(when accessor
-          `((declaim (ftype (function (,name-type &optional
-                                                  ,@(when errorp-arg-p `(t))
-                                                  ,@(when default-arg-p
-                                                      `((or ,type null))))
-                                      (values ,type &optional))
-                            ,accessor)
-                     (inline ,accessor))
-            (declaim (ftype (function (,type ,name-type &optional
-                                             ,@(when errorp-arg-p `(t))
-                                             ,@(when default-arg-p
-                                                 `((or ,type null))))
-                                      (values ,type &optional))
-                            (setf ,accessor))
-                     (inline (setf ,accessor)))))
-      ,@(when boundp
-          `((declaim (ftype (function (,name-type) (values boolean &optional))
-                            ,boundp))))
-      ,@(when makunbound
-          `((declaim (ftype (function (,name-type)
-                                      (values ,name-type &optional))
-                            ,makunbound)))))))
+         (default-arg-p (namespace-default-arg-in-accessor-p namespace))
+         (error-when-not-found-p (namespace-error-when-not-found-p namespace)))
+    `((declaim
+       ,@(when accessor
+           `((ftype (function (,name-type
+                               &optional
+                               ,@(when errorp-arg-p `(t))
+                               ,@(when default-arg-p `((or ,type null))))
+                              (values ,(if (and error-when-not-found-p
+                                                (not errorp-arg-p))
+                                           type
+                                           `(or ,type null))
+                                      &optional))
+                    ,accessor)
+             (inline ,accessor)
+             (ftype (function (,type ,name-type &optional
+                                     ,@(when errorp-arg-p `(t))
+                                     ,@(when default-arg-p
+                                         `((or ,type null))))
+                              (values ,type &optional))
+                    (setf ,accessor))
+             (inline (setf ,accessor))))
+       ,@(when boundp
+           `((ftype (function (,name-type) (values boolean &optional)) ,boundp)))
+       ,@(when makunbound
+           `((ftype (function (,name-type)
+                              (values ,name-type &optional))
+                    ,makunbound)))))))
 
 (defun make-unbound-condition-forms (namespace)
   (let ((name (namespace-name namespace))
@@ -78,11 +83,13 @@
             name))))))
 
 (defun make-documentation-forms (namespace documentation)
-  (let ((name (namespace-name namespace)))
-    `((defmethod documentation (name (type (eql ',name)))
+  (let ((name (namespace-name namespace))
+        (documentation-type (namespace-documentation-type namespace)))
+    `((defmethod documentation (name (type (eql ',documentation-type)))
         (let ((namespace (symbol-namespace ',name)))
           (gethash name (namespace-documentation-table namespace))))
-      (defmethod (setf documentation) (newdoc name (type (eql ',name)))
+      (defmethod (setf documentation)
+          (newdoc name (type (eql ',documentation-type)))
         (let* ((namespace (symbol-namespace ',name))
                (doc-table (namespace-documentation-table namespace)))
           (if (null newdoc)
@@ -105,6 +112,8 @@
             (name &optional
                     ,@(when errorp-arg-p `((errorp ,default-errorp errorpp)))
                     ,@(when default-arg-p `((default nil defaultp))))
+          ,@(when errorp-arg-p `((declare (ignorable errorp errorpp))))
+          ,@(when default-arg-p `((declare (ignorable default defaultp))))
           ,(format nil
                    "Automatically defined reader function.~%~
                     ~:[Returns NIL~;Signals ~:*~S~] if the value is not found ~
@@ -123,8 +132,8 @@
                     ,@(when default-arg-p
                         `((defaultp (setf (gethash name hash-table) default))))
                     ,@(when (and condition (or default-errorp errorp-arg-p))
-                        `((,(cond (default-errorp 't)
-                                  (errorp-arg-p 'errorp))
+                        `((,(cond (errorp-arg-p 'errorp)
+                                  (default-errorp 't))
                            (restart-case (error ',condition :name name)
                              (use-value (newval)
                                :report "Use specified value."
