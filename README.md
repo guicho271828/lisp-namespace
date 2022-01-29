@@ -6,8 +6,6 @@
 
 This is a utility for creating, accessing, and managing custom namespaces in Common Lisp. Originally started as a fork of [`LISP-NAMESPACE`](https://github.com/guicho271828/lisp-namespace), it became its own piece of software that is *somewhat* backwards compatible with it.
 
-Don't use it yet - it's volatile software that changes by the minute.
-
 ## Manual
 
 A namespace is a second-class concept in Common Lisp and refers to concept that allows to associate names of some sort with objects of some sort.
