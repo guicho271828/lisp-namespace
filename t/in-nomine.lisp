@@ -190,6 +190,18 @@
 
 ;; TODO test default values of long form
 
+(test long-form-default-values
+  ;; NOTE: HANDLER-BIND is to muffle redefinition warnings which may happen
+  ;;       when reevaluating DEFINE-NAMESPACE when running the test suite
+  ;;       multiple times in a single Lisp image.
+  (let ((namespace (handler-bind ((warning #'muffle-warning))
+                     (define-namespace default-values
+                       ;; A single keyword argument is required to trigger
+                       ;; the long form.
+                       ;; :VALUE-TYPE 'T
+                       :value-type 't))))
+    namespace))
+
 (test long-form-customized
   ;; NOTE: HANDLER-BIND is to muffle redefinition warnings which may happen
   ;;       when reevaluating DEFINE-NAMESPACE when running the test suite
