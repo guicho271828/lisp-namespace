@@ -11,17 +11,17 @@ This is a utility for creating, accessing, and managing custom namespaces in Com
 A namespace is a second-class concept in Common Lisp and refers to concept that allows to associate names of some sort with objects of some sort.
 
 Common Lisp has a lot of namespaces:
-* 1) variables/symbol macros
-* 2) functions/macros
-* 3) classes/conditions/types
-* 4) method combinations
-* 5) block names
-* 6) catch tags
-* 7) tagbody tags
-* 8) restarts
-* 9) packages
-* 10) compiler macros
-* 11) slot names 
+* 1\) variables/symbol macros
+* 2\) functions/macros
+* 3\) classes/conditions/types
+* 4\) method combinations
+* 5\) block names
+* 6\) catch tags
+* 7\) tagbody tags
+* 8\) restarts
+* 9\) packages
+* 10\) compiler macros
+* 11\) slot names 
 * ...
 * n) ASDF systems
 * n+1) ... (people can make new ones!)
