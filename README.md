@@ -28,7 +28,9 @@ Common Lisp has a lot of namespaces:
 
 This system is a utility to bring a first-class implementation of the concept of namespaces along with utilities to customize and manage them.
 
-The heart of the facility is the `DEFINE-NAMESPACE` macro, which comes in two forms: short (syntax-compatible with [`LISP-NAMESPACE:DEFINE-NAMESPACE`](https://github.com/guicho271828/lisp-namespace) and with mostly compatible effects) and long form (allowing for greater behavior customization). `DEFINE-NAMESPACE`, by default, generates functions for accessing the namespace, a condition signaled whenever an access to an unbound name is attempted, a type which denotes the values permissible in a namespace, and documentation types.
+The heart of the facility is the `DEFINE-NAMESPACE` macro, which comes in two forms: short (syntax-compatible with [`LISP-NAMESPACE:DEFINE-NAMESPACE`](https://github.com/guicho271828/lisp-namespace) and with mostly compatible effects) and long form (allowing for greater behavior customization).
+
+`DEFINE-NAMESPACE`, by default, generates functions for accessing the namespace, a condition signaled whenever an access to an unbound name is attempted, a type which denotes the values permissible in a namespace, and documentation types.
 
 By default, names are symbols and compared via `EQ`. This behavior is consistent with the way Common Lisp names variables and classes.
 
