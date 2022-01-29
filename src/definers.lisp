@@ -29,8 +29,7 @@
                                       &optional))
                     ,accessor)
              (inline ,accessor)))
-       ;; We do not generate a writer for NAMESPACE.
-       ;; TODO separate reader and writer names in namespace definition
+       ;; We do not generate a writer for namespace NAMESPACE.
        ,@(when (and accessor (not (eq name 'namespace)))
            `((ftype (function (,type ,name-type &optional
                                      ,@(when errorp-arg-p `(t))
