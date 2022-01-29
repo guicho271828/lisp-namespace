@@ -1,4 +1,4 @@
-;;;; This file is a part of LISP-NAMESPACE.
+;;;; This file is a part of IN-NOMINE.
 ;;;; Copyright (c) 2015 Masataro Asai (guicho2.71828@gmail.com),
 ;;;;               2022 Michał "phoe" Herda (phoe@disroot.org)
 ;;;;
@@ -10,7 +10,7 @@
 ;;;;         This is a terrible hack relying on undefined behavior and the most
 ;;;;         scary thing about it is that it seems to work.
 
-(in-package #:lisp-namespace)
+(in-package #:in-nomine)
 
 (defun make-namespace-describer (symbol stream)
   (flet ((describe-symbol-in-namespace (namespace-name namespace)
@@ -54,8 +54,8 @@
               (setf *describe-object-method* new-method)
               new-method)
             (warn "A previous DESCRIBE-OBJECT :AFTER (SYMBOL T) method which ~
-                   was not defined by LISP-NAMESPACE already exists; ~
-                   LISP-NAMESPACE will NOT overwrite it with a custom ~
+                   was not defined by IN-NOMINE already exists; ~
+                   IN-NOMINE will NOT overwrite it with a custom ~
                    method."))))))
 
 (with-describe-object-method-handling

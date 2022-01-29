@@ -1,10 +1,9 @@
-;;;; This file is a part of LISP-NAMESPACE.
+;;;; This file is a part of IN-NOMINE.
 ;;;; Copyright (c) 2015 Masataro Asai (guicho2.71828@gmail.com),
 ;;;;               2022 Michał "phoe" Herda (phoe@disroot.org)
 
-(uiop:define-package #:lisp-namespace
+(uiop:define-package #:in-nomine
   (:use #:cl #:alexandria)
-  (:nicknames #:lispn)
   (:export
    ;; Macros and utility functions
    #:define-namespace

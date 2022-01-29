@@ -1,22 +1,22 @@
-;;;; This file is a part of LISP-NAMESPACE.
+;;;; This file is a part of IN-NOMINE.
 ;;;; Copyright (c) 2015 Masataro Asai (guicho2.71828@gmail.com),
 ;;;;               2022 Michał "phoe" Herda (phoe@disroot.org)
 
 
-(defpackage #:lisp-namespace/test
+(defpackage #:in-nomine/test
   (:use #:cl
-        #:lisp-namespace
+        #:in-nomine
         #:fiveam)
   ;; Private symbols for testing.
-  (:import-from #:lisp-namespace
+  (:import-from #:in-nomine
                 #:*namespaces*
                 #:ensure-namespace)
-  (:export #:lisp-namespace))
+  (:export #:in-nomine))
 
-(in-package #:lisp-namespace/test)
+(in-package #:in-nomine/test)
 
-(def-suite lisp-namespace)
-(in-suite lisp-namespace)
+(def-suite in-nomine)
+(in-suite in-nomine)
 
 (test internal-structure
   (let* ((ns1 *namespaces*)
