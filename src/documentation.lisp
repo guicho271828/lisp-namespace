@@ -83,7 +83,7 @@ UNBOUND-NAMESPACE unless ERRORP is set."
  "Removes all bindings in the namespace with the given name."
  (documentation 'namespace-makunbound 'function)
  "Makes the name globally unbound as a namespace regardless of whether the name
-was previously bound." ;; TODO reexport and test this one
+was previously bound."
  (documentation 'namespace-boundp 'function)
  "Returns true if a namespace object with the provided name is globally bound,
 false otherwise."

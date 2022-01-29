@@ -29,4 +29,5 @@
    #:namespace
    #:symbol-namespace
    #:namespace-boundp
+   #:namespace-makunbound
    #:unbound-namespace))

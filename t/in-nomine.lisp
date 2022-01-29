@@ -358,6 +358,14 @@
 
 ;;; Condition tests
 
+(test makunbound-metanamespace
+  (multiple-value-bind (value condition)
+      (ignore-errors (namespace-makunbound 'namespace))
+    (is (null value))
+    (is (typep condition 'error))
+    (is (string= (princ-to-string condition)
+                 (format nil "Unable to remove the NAMESPACE namespace.")))))
+
 (test short-form-deprecation-warning
   (multiple-value-bind (value condition)
       (ignore-some-conditions (warning)
