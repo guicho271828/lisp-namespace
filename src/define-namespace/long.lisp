@@ -30,10 +30,10 @@
          (makunbound-symbol nil makunbound-symbol-p)
          (boundp-symbol nil boundp-symbol-p)
          (documentation-type nil documentation-type-p)
+         (hash-table-test nil hash-table-test-p)
          (error-when-not-found-p nil error-when-not-found-pp)
          (errorp-arg-in-accessor-p nil errorp-arg-in-accessor-pp)
          (default-arg-in-accessor-p nil default-arg-in-accessor-pp)
-         (hash-table-test nil hash-table-test-p)
          documentation)
       args
     (let ((arglist '()))
