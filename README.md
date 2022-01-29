@@ -6,6 +6,15 @@
 
 This is a utility for creating, accessing, and managing custom namespaces in Common Lisp. Originally started as a fork of [`LISP-NAMESPACE`](https://github.com/guicho271828/lisp-namespace), it became its own piece of software that is *somewhat* backwards compatible with it.
 
+## Syntax differences from `LISP-NAMESPACE`
+
+* Removed macros `NAMESPACE-LET` and `NSLET`,
+* Removed the `DEFINE-NAMESPACE` option to automatically generate `NAMESPACE-LET`-based binding macros,
+* Added boundp and makunbound functions for namespace names,
+* Moved hash tables for bindings and documentation from being implicitly created as variables to slots of the namespaces objects themselves,
+* Added long form of `DEFINE-NAMESPACE` to customize behavior of generated namespaces,
+* Exported namespace objects and their readers.
+
 ## Manual
 
 A namespace is a second-class concept in Common Lisp and refers to concept that allows to associate names of some sort with objects of some sort.
