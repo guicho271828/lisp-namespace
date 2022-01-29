@@ -31,8 +31,15 @@
     (is (eq ns1 ns5))
     (is (eq ns1 ns6))))
 
+(defmacro with-namespace ((name value) &body body)
+  ;; NOTE: HANDLER-BIND is to muffle any redefinition warnings which may happen
+  ;;       when reevaluating DEFINE-NAMESPACE when running the test suite
+  ;;       multiple times in a single Lisp image.
+  `(let ((,name (handler-bind ((warning #'muffle-warning)) ,value)))
+     ,@body))
+
 (test metanamespace-accessors
-  (let ((namespace *namespaces*))
+  (with-namespace (namespace *namespaces*)
     ;; Name
     (is (eq 'namespace (namespace-name namespace)))
     ;; Accessor
@@ -78,29 +85,21 @@
     (let ((hash-table (namespace-binding-table namespace)))
       (is (hash-table-p hash-table))
       (is (eq namespace (gethash 'namespace hash-table))))
-    ;; Documentation type
-    (let ((documentation-type (namespace-documentation-type namespace)))
-      (is (eq 'namespace documentation-type)))
-    ;; Documentation table
-    (let ((documentation-table (namespace-documentation-table namespace)))
-      (is (hash-table-p documentation-table))
-      (is (string= "A namespace for managing namespaces."
-                   (gethash 'namespace documentation-table))))
+    ;; Docstrings for namespaces are managed by namespace objects themselves.
+    (progn
+      (let ((documentation-type (namespace-documentation-type namespace)))
+        (is (null documentation-type)))
+      (let ((documentation-table (namespace-documentation-table namespace)))
+        (is (null documentation-table))))
     ;; Documentation
     (is (string= "A namespace for managing namespaces."
                  (documentation 'namespace 'namespace)))
-    ;; TODO fix this
-    ;; (is (string= "A namespace for managing namespaces."
-    ;;              (documentation namespace 't)))
-    ))
+    (is (string= "A namespace for managing namespaces."
+                 (documentation namespace 't)))))
 
 (test short-form
-  ;; NOTE: HANDLER-BIND is to muffle redefinition warnings which may happen
-  ;;       when reevaluating DEFINE-NAMESPACE when running the test suite
-  ;;       multiple times in a single Lisp image.
-  (let ((namespace (handler-bind ((warning #'muffle-warning))
-                     (define-namespace thing keyword nil
-                       "A thing namespace."))))
+  (with-namespace (namespace (define-namespace thing keyword nil
+                               "A thing namespace."))
     ;; Return value of DEFINE-NAMESPACE
     (is (typep namespace 'namespace))
     ;; Name
@@ -163,17 +162,19 @@
     (let ((value-type (namespace-value-type namespace)))
       (is (eq 'keyword value-type)))
     ;; Documentation
-    (is (eq "A thing." (setf (documentation 'this-thing 'thing) "A thing.")))
-    (is (eq "A thing." (documentation 'this-thing 'thing)))
+    (is (symbol-thing 'this-thing))
+    (is (string= "A thing."
+                 (setf (documentation 'this-thing 'thing) "A thing.")))
+    (is (string= "A thing." (documentation 'this-thing 'thing)))
     ;; Documentation table
     (let ((documentation-table (namespace-documentation-table namespace)))
       (is (hash-table-p documentation-table))
       (is (eq 'eq (hash-table-test documentation-table)))
       (is (string= "A thing." (gethash 'this-thing documentation-table))))
     ;; Documentation
-    ;; TODO fix this
-    ;; (is (string= "A thing namespace." (documentation namespace 'namespace)))
-    ))
+    (is (string= "A thing namespace." (documentation 'thing 'namespace)))
+    (is (string= "A thing namespace." (documentation namespace 't)))
+    (clear-namespace 'thing)))
 
 (test short-form-deprecation-warning
   (block nil
@@ -188,38 +189,29 @@
         (macroexpand-1 '(define-namespace test-warning-namespace t t)))
       (error "Test failure: no warning was signaled"))))
 
-;; TODO test default values of long form
-
 (test long-form-default-values
-  ;; NOTE: HANDLER-BIND is to muffle redefinition warnings which may happen
-  ;;       when reevaluating DEFINE-NAMESPACE when running the test suite
-  ;;       multiple times in a single Lisp image.
-  (let ((namespace (handler-bind ((warning #'muffle-warning))
-                     (define-namespace default-values
-                       ;; A single keyword argument is required to trigger
-                       ;; the long form.
-                       ;; :VALUE-TYPE 'T
-                       :value-type 't))))
+  (with-namespace (namespace (define-namespace default-values
+                               ;; A single keyword argument is required to trigger
+                               ;; the long form, hence :VALUE-TYPE T.
+                               :value-type t))
+    ;; TODO test default values of long form
     namespace))
 
 (test long-form-customized
-  ;; NOTE: HANDLER-BIND is to muffle redefinition warnings which may happen
-  ;;       when reevaluating DEFINE-NAMESPACE when running the test suite
-  ;;       multiple times in a single Lisp image.
-  (let ((namespace (handler-bind ((warning #'muffle-warning))
-                     (define-namespace stuff
-                       :name-type string
-                       :value-type string
-                       :accessor string-stuff
-                       :condition-name not-enough-stuff
-                       :type-name stuff
-                       :makunbound-symbol yeet-stuff
-                       :boundp-symbol stuff-exists-p
-                       :documentation-type some-stuff
-                       :error-when-not-found-p t
-                       :errorp-arg-in-accessor-p t
-                       :default-arg-in-accessor-p t
-                       :hash-table-test equal))))
+  (with-namespace (namespace (define-namespace stuff
+                               :name-type string
+                               :value-type string
+                               :accessor string-stuff
+                               :condition-name not-enough-stuff
+                               :type-name stuff
+                               :makunbound-symbol yeet-stuff
+                               :boundp-symbol stuff-exists-p
+                               :documentation-type some-stuff
+                               :error-when-not-found-p t
+                               :errorp-arg-in-accessor-p t
+                               :default-arg-in-accessor-p t
+                               :hash-table-test equal
+                               :documentation "Stuff."))
     ;; Return value of DEFINE-NAMESPACE
     (is (typep namespace 'namespace))
     ;; Name
@@ -279,7 +271,10 @@
     ;; Type
     (let ((value-type (namespace-value-type namespace)))
       (is (eq 'string value-type)))
-    ;; Documentation
+    ;; Namespace documentation
+    (is (string= "Stuff." (documentation 'stuff 'namespace)))
+    (is (string= "Stuff." (documentation namespace 't)))
+    ;; Value documentation
     (is (string= "docs" (setf (documentation "key" 'some-stuff) "docs")))
     (is (string= "docs" (documentation "key" 'some-stuff)))
     ;; Documentation table

@@ -56,15 +56,12 @@
         (when hash-table-test-p (c :hash-table-test hash-table-test)))
       (values arglist documentation))))
 
-(defun quote-plist-values (plist)
-  (loop for (key value) on plist by #'cddr collect key collect `',value))
-
 (defun %define-namespace-long-form (name &rest args)
   (multiple-value-bind (arglist documentation) (parse-long-form-arglist args)
     (let ((namespace (apply #'ensure-namespace name arglist)))
       `(eval-when (:compile-toplevel :load-toplevel :execute)
          (setf (gethash ',name (namespace-binding-table *namespaces*))
-               (ensure-namespace ',name ,@(quote-plist-values args)))
+               (apply #'ensure-namespace ',name ',args))
          ,@(make-proclamations namespace)
          ,@(make-unbound-condition-forms namespace)
          ,@(make-type-forms namespace)

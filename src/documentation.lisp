@@ -29,6 +29,8 @@ DEFINE-NAMESPACE defines 4 functions/macros:
  (documentation 'clear-namespace 'function)
  "Get rid of all values bound in the given namespace."
  (documentation 'namespace 'namespace)
- "A namespace for managing namespaces.")
+ #1="A namespace for managing namespaces."
+ (documentation *namespaces* 't)
+ #1#)
 
 ;; TODO all exports

@@ -85,16 +85,18 @@
 (defun make-documentation-forms (namespace documentation)
   (let ((name (namespace-name namespace))
         (documentation-type (namespace-documentation-type namespace)))
-    `((defmethod documentation (name (type (eql ',documentation-type)))
-        (let ((namespace (symbol-namespace ',name)))
-          (gethash name (namespace-documentation-table namespace))))
-      (defmethod (setf documentation)
-          (newdoc name (type (eql ',documentation-type)))
-        (let* ((namespace (symbol-namespace ',name))
-               (doc-table (namespace-documentation-table namespace)))
-          (if (null newdoc)
-              (remhash name doc-table)
-              (setf (gethash name doc-table) newdoc))))
+    `(,@(when documentation-type
+          `((defmethod documentation (name (type (eql ',documentation-type)))
+              (let ((namespace (symbol-namespace ',name)))
+                (values (gethash name
+                                 (namespace-documentation-table namespace)))))
+            (defmethod (setf documentation)
+                (newdoc name (type (eql ',documentation-type)))
+              (let* ((namespace (symbol-namespace ',name))
+                     (doc-table (namespace-documentation-table namespace)))
+                (if (null newdoc)
+                    (remhash name doc-table)
+                    (setf (gethash name doc-table) newdoc))))))
       ,@(when documentation
           `((setf (documentation ',name 'namespace) ,documentation))))))
 

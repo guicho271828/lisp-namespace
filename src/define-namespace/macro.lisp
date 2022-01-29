@@ -9,7 +9,9 @@
       (apply #'%define-namespace-long-form name args)
       (apply #'%define-namespace-short-form name args)))
 
-(define-namespace namespace namespace nil)
+(define-namespace namespace
+  :value-type namespace
+  :documentation-type nil)
 
 (defun clear-namespace (name)
   (when (eq name 'namespace)
