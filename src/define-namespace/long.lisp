@@ -57,7 +57,7 @@
   (multiple-value-bind (arglist documentation) (parse-long-form-arglist args)
     (let ((namespace (apply #'ensure-namespace name arglist)))
       `(eval-when (:compile-toplevel :load-toplevel :execute)
-         (setf (gethash ',name (namespace-hash-table *namespaces*))
+         (setf (gethash ',name (namespace-binding-table *namespaces*))
                (ensure-namespace ',name ,@args))
          ,@(make-proclamations namespace)
          ,@(make-unbound-condition-forms namespace)

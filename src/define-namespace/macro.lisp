@@ -5,7 +5,7 @@
 (in-package #:lisp-namespace)
 
 (defmacro define-namespace (name &rest args)
-  (if (and (not (null args)) (consp (first args)))
+  (if (and (not (null args)) (keywordp (first args)))
       (apply #'%define-namespace-long-form name args)
       (apply #'%define-namespace-short-form name args)))
 
@@ -15,6 +15,6 @@
   (when (eq name 'namespace)
     (error "Clearing the namespace of all namespaces is a bad idea."))
   (let ((namespace (symbol-namespace name)))
-    (clrhash (namespace-hash-table namespace))
+    (clrhash (namespace-binding-table namespace))
     (clrhash (namespace-documentation-table namespace))
     name))

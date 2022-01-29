@@ -15,7 +15,7 @@
   (check-redefine-meta-namespace name)
   (let ((namespace (ensure-namespace name :value-type value-type)))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (setf (gethash ',name (namespace-hash-table *namespaces*))
+       (setf (gethash ',name (namespace-binding-table *namespaces*))
              (ensure-namespace ',name :value-type ',value-type))
        ,@(make-proclamations namespace)
        ,@(make-unbound-condition-forms namespace)

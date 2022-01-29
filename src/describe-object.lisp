@@ -63,4 +63,4 @@
     (let ((*print-pretty* t)
           (describer (make-namespace-describer symbol stream)))
       (pprint-logical-block (stream nil)
-        (maphash describer (namespace-hash-table *namespaces*))))))
+        (maphash describer (namespace-binding-table *namespaces*))))))

@@ -19,7 +19,12 @@
    #:namespace-type-name
    #:namespace-makunbound-symbol
    #:namespace-boundp-symbol
-   #:namespace-hash-table
+   #:namespace-documentation-type
+   #:namespace-error-when-not-found-p
+   #:namespace-errorp-arg-in-accessor-p
+   #:namespace-default-arg-in-accessor-p
+   #:namespace-hash-table-test
+   #:namespace-binding-table
    #:namespace-documentation-table
    ;; Namespace accessors
    #:symbol-namespace
