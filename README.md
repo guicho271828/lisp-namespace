@@ -33,6 +33,7 @@ Common Lisp has a lot of namespaces:
 * 11\) slot names 
 * 12\) logical hosts
 * 13\) character names
+* 14\) character codes
 * ...
 * n) ASDF systems
 * n+1) ... (people can make new ones!)
