@@ -11,7 +11,7 @@
          (accessor (namespace-accessor namespace))
          (boundp (namespace-boundp-symbol namespace))
          (makunbound (namespace-makunbound-symbol namespace))
-         (type (namespace-type-name namespace))
+         (type (or (namespace-type-name namespace) 't))
          (errorp-arg-p (namespace-errorp-arg-in-accessor-p namespace))
          (default-arg-p (namespace-default-arg-in-accessor-p namespace))
          (error-when-not-found-p (namespace-error-when-not-found-p namespace)))

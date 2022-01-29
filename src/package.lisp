@@ -28,6 +28,5 @@
    ;; Namespace accessors
    #:symbol-namespace
    #:unbound-namespace
-   #:namespace-type
    #:namespace-makunbound
    #:namespace-boundp))

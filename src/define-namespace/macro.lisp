@@ -9,9 +9,10 @@
       (apply #'%define-namespace-long-form name args)
       (apply #'%define-namespace-short-form name args)))
 
-(define-namespace namespace
-  :value-type namespace
-  :documentation-type nil)
+(macrolet ((define ()
+             `(define-namespace namespace
+                ,@*namespace-args*)))
+  (define))
 
 (defun clear-namespace (name)
   (when (eq name 'namespace)

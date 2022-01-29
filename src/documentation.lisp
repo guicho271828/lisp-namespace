@@ -116,4 +116,18 @@ defined."
 
  ;; Metanamespace
  (documentation 'namespace 'namespace)
- "A namespace for managing namespaces.")
+ "A namespace for managing namespaces."
+ (documentation 'symbol-namespace 'function)
+ "Returns a namespace object with the given global name. Signals
+UNBOUND-NAMESPACE unless ERRORP is set."
+ (documentation '(setf symbol-namespace) 'function)
+ "Globally associated a namespace object with the given name."
+ (documentation 'unbound-namespace 'function)
+ "A subtype of CELL-ERROR signaled when there is an attempt to access a
+namespace object that does not exist."
+ (documentation 'namespace-makunbound 'function)
+ "Makes the provided symbol globally unbound as a namespace name, regardless of
+whether it was previously bound."
+ (documentation 'namespace-boundp 'function)
+ "Returns true if a namespace object with the provided name is globally bound,
+false otherwise.")

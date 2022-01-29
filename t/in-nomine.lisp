@@ -79,8 +79,7 @@
             (is (null (funcall boundp-symbol 'some-other-namespace)))))))
     ;; Type name
     (let ((type-name (namespace-type-name namespace)))
-      (is (eq 'namespace-type type-name))
-      (is (alexandria:type= 'namespace type-name)))
+      (is (null type-name)))
     ;; Type
     (let ((value-type (namespace-value-type namespace)))
       (is (eq 'namespace value-type)))
