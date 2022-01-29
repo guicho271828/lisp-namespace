@@ -29,11 +29,12 @@ Common Lisp has a lot of namespaces:
 * 7\) tagbody tags
 * 8\) restarts
 * 9\) packages
-* 10\) compiler macros
-* 11\) slot names 
-* 12\) logical hosts
-* 13\) character names
-* 14\) character codes
+* 10\) modules ~~(even though ASDF mostly superseded these)~~
+* 11\) compiler macros
+* 12\) slot names 
+* 13\) logical hosts
+* 14\) character names
+* 15\) character codes
 * ...
 * n) ASDF systems
 * n+1) ... (people can make new ones!)
