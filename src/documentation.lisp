@@ -13,7 +13,7 @@ Common Lisp is a Lisp-N, which means that it has a different namespaces for
 variables, functions, types, and so on. Users can also define their own
 namespaces, and IN-NOMINE is a toolkit for making that process easier."
 
- ;; Defining and clearing namespaces
+ ;; Namespace definition and management
  (documentation 'define-namespace 'function)
  "Defines a new namespace object in the global namespace namespace along with
 a series of functions, types, conditions, and type proclamations for accessing
@@ -27,6 +27,14 @@ Two forms of this macro are provided:
     * BINDING - deprecated, only present for syntax compatibility with
                 LISP-NAMESPACE; must be NIL when provided,
     * DOCUMENTATION - documentation string for the namespace object.
+  * For name FOO, the following are generated:
+    * Accessor functions SYMBOL-FOO and (SETF SYMBOL-FOO),
+    * Makunbound function FOO-MAKUNBOUND,
+    * Boundp function FOO-BOUNDP,
+    * Type proclamations for the four functions above,
+    * Condition type UNBOUND-FOO,
+    * Type FOO-TYPE denoting the specified VALUE-TYPE,
+    * Documentation methods with documentation type specialized on (EQL 'FOO).
 * long form:
   * (DEFINE-NAMESPACE NAME
        &KEY NAME-TYPE VALUE-TYPE ACCESSOR CONDITION-NAME TYPE-NAME
@@ -64,13 +72,28 @@ Two forms of this macro are provided:
                                   automatic setting of unbound values,
     * HASH-TABLE-TEST - a symbol naming the hash table test of the binding and
                         documentation hash tables of the namespace,
-    * DOCUMENTATION - documentation string for the namespace object."
+    * DOCUMENTATION - documentation string for the namespace object.
+
+The consequences are undefined if a namespace is redefined in an incompatible
+way with the previous one."
+ (documentation 'symbol-namespace 'function)
+ "Returns a namespace object with the given global name. Signals
+UNBOUND-NAMESPACE unless ERRORP is set."
  (documentation 'clear-namespace 'function)
- "Get rid of all values bound in the given namespace."
+ "Removes all bindings in the namespace with the given name."
+ (documentation 'namespace-makunbound 'function)
+ "Makes the name globally unbound as a namespace regardless of whether the name
+was previously bound." ;; TODO reexport and test this one
+ (documentation 'namespace-boundp 'function)
+ "Returns true if a namespace object with the provided name is globally bound,
+false otherwise."
+ (documentation 'unbound-namespace 'type)
+ "A subtype of CELL-ERROR signaled when there is an attempt to access a
+namespace object that does not exist."
 
  ;; Namespace class and accessors
  (documentation 'namespace 'type)
- "A namespace object, representing a Common Lisp namespace."
+ "A class of namespace objects which represent a Common Lisp namespace."
  (documentation 'namespace-name 'function)
  "Returns the symbol naming a namespace."
  (documentation 'namespace-name-type 'function)
@@ -114,20 +137,6 @@ hash tables of the namespace."
  "Returns the documentation hash table, or NIL if no documentation type is
 defined."
 
- ;; Metanamespace
+ ;; Namespaces
  (documentation 'namespace 'namespace)
- "A namespace for managing namespaces."
- (documentation 'symbol-namespace 'function)
- "Returns a namespace object with the given global name. Signals
-UNBOUND-NAMESPACE unless ERRORP is set."
- (documentation '(setf symbol-namespace) 'function)
- "Globally associated a namespace object with the given name."
- (documentation 'unbound-namespace 'function)
- "A subtype of CELL-ERROR signaled when there is an attempt to access a
-namespace object that does not exist."
- (documentation 'namespace-makunbound 'function)
- "Makes the provided symbol globally unbound as a namespace name, regardless of
-whether it was previously bound."
- (documentation 'namespace-boundp 'function)
- "Returns true if a namespace object with the provided name is globally bound,
-false otherwise.")
+ "A namespace for managing namespaces.")

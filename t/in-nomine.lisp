@@ -48,7 +48,7 @@
   `(let ((,name (handler-bind ((warning #'muffle-warning)) ,value)))
      ,@body))
 
-(test metanamespace-accessors
+(test metanamespace
   (with-namespace (namespace *namespaces*)
     ;; Name
     (is (eq 'namespace (namespace-name namespace)))
@@ -56,8 +56,6 @@
     (let ((accessor (namespace-accessor namespace)))
       (is (eq 'symbol-namespace accessor))
       (is (eq namespace (funcall accessor 'namespace)))
-      (funcall (fdefinition `(setf ,accessor)) namespace 'some-other-namespace)
-      (is (eq namespace (funcall accessor 'some-other-namespace)))
       ;; Condition
       (let ((condition-name (namespace-condition-name namespace)))
         (is (eq 'unbound-namespace condition-name))
@@ -66,17 +64,9 @@
           (signals unbound-namespace
             (handler-bind ((unbound-namespace #'verify-cell-error-name))
               (funcall (funcall accessor 'yet-another-namespace)))))
-        ;; Boundp
-        (let ((boundp-symbol (namespace-boundp-symbol namespace)))
-          (is (eq 'namespace-boundp boundp-symbol))
-          (is (funcall boundp-symbol 'namespace))
-          (is (funcall boundp-symbol 'some-other-namespace))
-          (is (null (funcall boundp-symbol 'yet-another-namespace)))
-          ;; Makunbound
-          (let ((makunbound-symbol (namespace-makunbound-symbol namespace)))
-            (is (eq 'namespace-makunbound makunbound-symbol))
-            (funcall makunbound-symbol 'some-other-namespace)
-            (is (null (funcall boundp-symbol 'some-other-namespace)))))))
+        ;; No tests for writer, boundp, and makunbound, because the NAMESPACE
+        ;; namespace does not have them.
+        ))
     ;; Type name
     (let ((type-name (namespace-type-name namespace)))
       (is (null type-name)))

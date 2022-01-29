@@ -7,7 +7,8 @@
 ;;; Minor forms
 
 (defun make-proclamations (namespace)
-  (let* ((name-type (namespace-name-type namespace))
+  (let* ((name (namespace-name namespace))
+         (name-type (namespace-name-type namespace))
          (accessor (namespace-accessor namespace))
          (boundp (namespace-boundp-symbol namespace))
          (makunbound (namespace-makunbound-symbol namespace))
@@ -27,8 +28,11 @@
                                            `(or ,type null))
                                       &optional))
                     ,accessor)
-             (inline ,accessor)
-             (ftype (function (,type ,name-type &optional
+             (inline ,accessor)))
+       ;; We do not generate a writer for NAMESPACE.
+       ;; TODO separate reader and writer names in namespace definition
+       ,@(when (and accessor (not (eq name 'namespace)))
+           `((ftype (function (,type ,name-type &optional
                                      ,@(when errorp-arg-p `(t))
                                      ,@(when default-arg-p
                                          `((or ,type null))))
@@ -56,10 +60,6 @@
         (value-type (namespace-value-type namespace)))
     (when type-name
       `((deftype ,type-name () ',value-type)))))
-
-(defun read-evaluated-form ()
-  (format *query-io* "~&;; Type a form to be evaluated:~%")
-  (list (eval (read *query-io*))))
 
 (defun make-boundp-forms (namespace)
   (let ((name (namespace-name namespace))
@@ -102,6 +102,10 @@
 
 ;;; Reader forms
 
+(defun read-evaluated-form ()
+  (format *query-io* "~&;; Type a form to be evaluated:~%")
+  (list (eval (read *query-io*))))
+
 (defun make-reader-forms (namespace)
   (let ((name (namespace-name namespace))
         (accessor (namespace-accessor namespace))
@@ -127,7 +131,7 @@
           ;; the metacycle in #'SYMBOL-NAMESPACE.
           (let* ((namespace ,(if (eq name 'namespace)
                                  '*namespaces*
-                                 `(symbol-namespace ',name)))
+                                  `(symbol-namespace ',name)))
                  (hash-table (namespace-binding-table namespace)))
             (multiple-value-bind (value foundp) (gethash name hash-table)
               (cond (foundp value)
@@ -154,7 +158,7 @@
         (accessor (namespace-accessor namespace))
         (errorp-arg-p (namespace-errorp-arg-in-accessor-p namespace))
         (default-arg-p (namespace-default-arg-in-accessor-p namespace)))
-    (when accessor
+    (when (and accessor (not (eq name 'namespace)))
       `((defun (setf ,accessor)
             (new-value name &optional
                               ,@(when errorp-arg-p `((errorp nil)))

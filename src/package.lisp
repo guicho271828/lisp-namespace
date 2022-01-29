@@ -25,8 +25,8 @@
    #:namespace-hash-table-test
    #:namespace-binding-table
    #:namespace-documentation-table
-   ;; Namespace accessors
+   ;; Metanamespace accessors
+   #:namespace
    #:symbol-namespace
-   #:unbound-namespace
-   #:namespace-makunbound
-   #:namespace-boundp))
+   #:namespace-boundp
+   #:unbound-namespace))
