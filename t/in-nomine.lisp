@@ -7,6 +7,7 @@
   (:use #:cl
         #:in-nomine
         #:fiveam)
+  (:local-nicknames (#:n #:lisp-namespace))
   ;; Private symbols for testing.
   (:import-from #:in-nomine
                 #:*namespaces*
@@ -38,6 +39,49 @@
     (is (eq ns1 ns4))
     (is (eq ns1 ns5))
     (is (eq ns1 ns6))))
+
+;;; Condition tests
+
+(test makunbound-metanamespace
+  (multiple-value-bind (value condition)
+      (ignore-errors (namespace-makunbound 'namespace))
+    (is (null value))
+    (is (typep condition 'error))
+    (is (string= (princ-to-string condition)
+                 (format nil "Unable to remove the NAMESPACE namespace.")))))
+
+(test short-form-deprecation-warning
+  (multiple-value-bind (value condition)
+      (ignore-some-conditions (warning)
+        (macroexpand-1 `(define-namespace test-warning-namespace t t)))
+    (is (null value))
+    (is (typep condition 'warning))
+    (is (string= (princ-to-string condition)
+                 (format nil "Deprecated option BINDING used in ~
+                              DEFINE-NAMESPACE: no binding form was ~
+                              generated.")))))
+
+(test macroexpansion-time-errors
+  (multiple-value-bind (value condition)
+      (ignore-errors (macroexpand-1 `(define-namespace cl:car t)))
+    (is (null value))
+    (is (typep condition 'error))
+    (is (string= (princ-to-string condition)
+                 (format nil "~S is a standard Common Lisp symbol and it ~
+                              cannot be used as a namespace name."
+                         'cl:car))))
+  (multiple-value-bind (value condition)
+      (ignore-errors
+       (flet ((validate-restart (condition)
+                (let ((restart (find-restart 'continue condition)))
+                  (is (string= (princ-to-string restart)
+                               "Redefine the namespace.")))))
+         (handler-bind ((error #'validate-restart))
+           (macroexpand-1 `(define-namespace namespace t)))))
+    (is (null value))
+    (is (typep condition 'error))
+    (is (string= (princ-to-string condition)
+                 (format nil "Attempting to redefine namespace NAMESPACE.")))))
 
 ;;; Metanamespace
 
@@ -194,7 +238,9 @@
                                :errorp-arg-in-accessor-p t
                                :default-arg-in-accessor-p t
                                :hash-table-test equal
-                               :documentation "Stuff."))
+                               :documentation "Stuff."
+                               :binding-table-var *binding-stuff*
+                               :documentation-table-var *documentation-stuff*))
     ;; Return value of DEFINE-NAMESPACE
     (is (typep namespace 'namespace))
     ;; Name
@@ -215,7 +261,8 @@
         ;; Binding table
         (let ((binding-table (namespace-binding-table namespace)))
           (is (hash-table-p binding-table))
-          (is (eq "value-1" (gethash "key-1" binding-table))))
+          (is (eq "value-1" (gethash "key-1" binding-table)))
+          (is (eq binding-table (symbol-value '*binding-stuff*))))
         ;; Boundp
         (let ((boundp-symbol (namespace-boundp-symbol namespace)))
           (is (eq 'stuff-exists-p boundp-symbol))
@@ -263,7 +310,8 @@
     ;; Documentation table
     (let ((documentation-table (namespace-documentation-table namespace)))
       (is (hash-table-p documentation-table))
-      (is (string= "docs" (gethash "key" documentation-table))))))
+      (is (string= "docs" (gethash "key" documentation-table)))
+      (is (eq documentation-table (symbol-value '*documentation-stuff*))))))
 
 (test long-form-default-values
   (with-namespace (namespace (define-namespace default
@@ -356,45 +404,88 @@
              (method (find-method #'(setf documentation) '() specializers nil)))
         (is (null method))))))
 
-;;; Condition tests
+;;; LISP-NAMESPACE
 
-(test makunbound-metanamespace
-  (multiple-value-bind (value condition)
-      (ignore-errors (namespace-makunbound 'namespace))
-    (is (null value))
-    (is (typep condition 'error))
-    (is (string= (princ-to-string condition)
-                 (format nil "Unable to remove the NAMESPACE namespace.")))))
-
-(test short-form-deprecation-warning
-  (multiple-value-bind (value condition)
-      (ignore-some-conditions (warning)
-        (macroexpand-1 `(define-namespace test-warning-namespace t t)))
-    (is (null value))
-    (is (typep condition 'warning))
-    (is (string= (princ-to-string condition)
-                 (format nil "Deprecated option BINDING true in ~
-                              DEFINE-NAMESPACE: no binding form was ~
-                              generated.")))))
-
-(test macroexpansion-time-errors
-  (multiple-value-bind (value condition)
-      (ignore-errors (macroexpand-1 `(define-namespace cl:car t)))
-    (is (null value))
-    (is (typep condition 'error))
-    (is (string= (princ-to-string condition)
-                 (format nil "~S is a standard Common Lisp symbol and it ~
-                              cannot be used as a namespace name."
-                         'cl:car))))
-  (multiple-value-bind (value condition)
-      (ignore-errors
-       (flet ((validate-restart (condition)
-                (let ((restart (find-restart 'continue condition)))
-                  (is (string= (princ-to-string restart)
-                               "Redefine the namespace.")))))
-         (handler-bind ((error #'validate-restart))
-           (macroexpand-1 `(define-namespace namespace t)))))
-    (is (null value))
-    (is (typep condition 'error))
-    (is (string= (princ-to-string condition)
-                 (format nil "Attempting to redefine namespace NAMESPACE.")))))
+(test lisp-namespace
+  (with-namespace (namespace (n:define-namespace bazinga keyword nil
+                               "A bazinga namespace."))
+    ;; Return value of DEFINE-NAMESPACE
+    (is (typep namespace 'namespace))
+    ;; Name
+    (is (eq 'bazinga (namespace-name namespace)))
+    ;; Accessor
+    (let ((accessor (namespace-accessor namespace)))
+      (is (eq 'symbol-bazinga accessor))
+      (funcall (fdefinition `(setf ,accessor)) :bazinga 'this-bazinga)
+      (is (eq :bazinga (funcall accessor 'this-bazinga)))
+      ;; Condition
+      (let ((condition-name (namespace-condition-name namespace)))
+        (is (eq 'unbound-bazinga condition-name))
+        (flet ((verify-cell-error-name (condition)
+                 (is (eq 'that-bazinga (cell-error-name condition)))))
+          (signals unbound-bazinga
+            (handler-bind ((unbound-bazinga #'verify-cell-error-name))
+              (funcall (funcall accessor 'that-bazinga)))))
+        ;; Binding table
+        (let ((binding-table (namespace-binding-table namespace)))
+          (is (hash-table-p binding-table))
+          (is (eq 'eq (hash-table-test binding-table)))
+          (is (eq :bazinga (gethash 'this-bazinga binding-table)))
+          (is (eq (namespace-binding-table-var namespace) '*bazinga-table*))
+          (is (eq binding-table (symbol-value '*bazinga-table*))))
+        ;; Boundp
+        (let ((boundp-symbol (namespace-boundp-symbol namespace)))
+          (is (eq 'bazinga-boundp boundp-symbol))
+          (is (funcall boundp-symbol 'this-bazinga))
+          (is (null (funcall boundp-symbol 'that-bazinga)))
+          ;; Makunbound
+          (let ((makunbound-symbol (namespace-makunbound-symbol namespace)))
+            (is (eq 'bazinga-makunbound makunbound-symbol))
+            (funcall makunbound-symbol 'this-bazinga)
+            (is (null (funcall boundp-symbol 'this-bazinga))))
+          ;; Accessor default arg
+          (is (eq :bazinga (funcall accessor 'this-bazinga :bazinga)))
+          (is (eq :bazinga (funcall accessor 'this-bazinga)))))
+      ;; CLEAR-NAMESPACE
+      (funcall (fdefinition `(setf ,accessor)) :nobazinga 'that-bazinga)
+      (is (eq :bazinga (funcall accessor 'this-bazinga)))
+      (is (eq :nobazinga (funcall accessor 'that-bazinga)))
+      (n:clear-namespace 'bazinga)
+      (signals unbound-bazinga (funcall accessor 'this-bazinga))
+      (signals unbound-bazinga (funcall accessor 'that-bazinga))
+      ;; Restarts
+      (flet ((handle (c) (use-value :bazinga c)))
+        (is (eq :bazinga (handler-bind ((unbound-bazinga #'handle))
+                           (funcall accessor 'this-bazinga)))))
+      (signals unbound-bazinga (funcall accessor 'this-bazinga))
+      (flet ((handle (c) (store-value :bazinga c)))
+        (is (eq :bazinga (handler-bind ((unbound-bazinga #'handle))
+                           (funcall accessor 'this-bazinga)))))
+      (is (eq :bazinga (funcall accessor 'this-bazinga))))
+    ;; Hash table test
+    (let ((test (namespace-hash-table-test namespace)))
+      (eq test 'eq))
+    ;; Type name
+    (let ((type-name (namespace-type-name namespace)))
+      (is (eq 'bazinga-type type-name))
+      (is (alexandria:type= 'keyword type-name)))
+    ;; Type
+    (let ((value-type (namespace-value-type namespace)))
+      (is (eq 'keyword value-type)))
+    ;; Documentation
+    (is (symbol-bazinga 'this-bazinga))
+    (is (string= "A bazinga."
+                 (setf (documentation 'this-bazinga 'bazinga) "A bazinga.")))
+    (is (string= "A bazinga." (documentation 'this-bazinga 'bazinga)))
+    ;; Documentation table
+    (let ((documentation-table (namespace-documentation-table namespace)))
+      (is (hash-table-p documentation-table))
+      (is (eq 'eq (hash-table-test documentation-table)))
+      (is (string= "A bazinga." (gethash 'this-bazinga documentation-table)))
+      (is (eq (namespace-documentation-table-var namespace)
+              '*bazinga-doc-table*))
+      (is (eq documentation-table (symbol-value '*bazinga-doc-table*))))
+    ;; Documentation
+    (is (string= "A bazinga namespace." (documentation 'bazinga 'namespace)))
+    (is (string= "A bazinga namespace." (documentation namespace 't)))
+    (n:clear-namespace 'bazinga)))

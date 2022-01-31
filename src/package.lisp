@@ -25,6 +25,8 @@
    #:namespace-hash-table-test
    #:namespace-binding-table
    #:namespace-documentation-table
+   #:namespace-binding-table-var
+   #:namespace-documentation-table-var
    ;; Metanamespace accessors
    #:namespace
    #:symbol-namespace

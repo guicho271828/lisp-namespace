@@ -34,6 +34,8 @@
          (error-when-not-found-p nil error-when-not-found-pp)
          (errorp-arg-in-accessor-p nil errorp-arg-in-accessor-pp)
          (default-arg-in-accessor-p nil default-arg-in-accessor-pp)
+         (binding-table-var nil binding-table-var-p)
+         (documentation-table-var nil documentation-table-var-p)
          documentation)
       args
     (let ((arglist '()))
@@ -53,7 +55,11 @@
           (c :errorp-arg-in-accessor-p errorp-arg-in-accessor-p))
         (when default-arg-in-accessor-pp
           (c :default-arg-in-accessor-p default-arg-in-accessor-p))
-        (when hash-table-test-p (c :hash-table-test hash-table-test)))
+        (when hash-table-test-p (c :hash-table-test hash-table-test))
+        (when binding-table-var-p
+          (c :binding-table-var binding-table-var))
+        (when documentation-table-var-p
+          (c :documentation-table-var documentation-table-var)))
       (values arglist documentation))))
 
 (defun %define-namespace-long-form (name &rest args)
@@ -70,4 +76,6 @@
          ,@(make-boundp-forms namespace)
          ,@(make-makunbound-forms namespace)
          ,@(make-documentation-forms namespace documentation)
+         ,@(make-binding-table-var-forms namespace)
+         ,@(make-documentation-table-var-forms namespace)
          (symbol-namespace ',name)))))

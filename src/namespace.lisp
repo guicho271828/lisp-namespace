@@ -40,7 +40,9 @@
     (default-arg-in-accessor-p (e) :type boolean :read-only t)
     (documentation             (e) :type (or null string))
     (binding-table             (e) :type (or null hash-table))
-    (documentation-table       (e) :type (or null hash-table))))
+    (documentation-table       (e) :type (or null hash-table))
+    (binding-table-var         (e) :type symbol  :read-only t)
+    (documentation-table-var   (e) :type symbol  :read-only t)))
 
 (defun check-namespace-parameters (namespace)
   (when (null (namespace-condition-name namespace))
@@ -65,6 +67,8 @@
             (error-when-not-found-p t)
             (errorp-arg-in-accessor-p nil)
             (default-arg-in-accessor-p t)
+            (binding-table-var nil)
+            (documentation-table-var nil)
             (documentation nil))
   (let ((namespace (%make-namespace
                     :name name :name-type name-type :value-type value-type
@@ -89,6 +93,8 @@
                     (if (and documentation-type-p (null documentation-type))
                         nil
                         (make-hash-table :test hash-table-test))
+                    :binding-table-var binding-table-var
+                    :documentation-table-var documentation-table-var
                     :documentation documentation)))
     (check-namespace-parameters namespace)
     namespace))
@@ -100,7 +106,9 @@
     :documentation-type nil
     :default-arg-in-accessor-p nil
     :errorp-arg-in-accessor-p t
-    :type-name nil))
+    :type-name nil
+    :binding-table-var nil
+    :documentation-table-var nil))
 
 (defvar *namespaces* (apply #'make-namespace 'namespace *namespace-args*))
 

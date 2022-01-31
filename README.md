@@ -19,25 +19,28 @@ This is a utility for creating, accessing, and managing custom namespaces in Com
 
 A namespace is a second-class concept in Common Lisp and refers to concept that allows to associate names of some sort with objects of some sort.
 
-Common Lisp has a lot of namespaces:
-* 1\) variables/symbol macros
-* 2\) functions/macros
-* 3\) classes/conditions/types
-* 4\) method combinations
-* 5\) block names
-* 6\) catch tags
-* 7\) tagbody tags
-* 8\) restarts
-* 9\) packages
-* 10\) modules ~~(even though ASDF mostly superseded these)~~
-* 11\) compiler macros
-* 12\) slot names 
-* 13\) logical hosts
-* 14\) character names
-* 15\) character codes
+Common Lisp has a lot of namespaces whose keys can come in various shapes:
+
+* variables and symbol macros (symbols),
+* functions anc macros (symbols),
+* compiler macros (symbols),
+* classes, conditions, and types (symbols),
+* slot names (symbols),
+* method combinations (symbols),
+* block names (symbols),
+* tagbody tags (symbols and integers)
+* catch tags (any Lisp objects),
+* restarts (symbols),
+* packages (strings),
+* modules (strings),
+* logical pathname hosts (strings),
+* reader macros (characters),
+* character codes (characters),
+* character names (strings),
+* characters *(only true on some implementations)* (integers),
 * ...
-* n) ASDF systems
-* n+1) ... (people can make new ones!)
+* ASDF systems (lowercase strings),
+* ... (people can make new ones!)
 
 This system is a utility to bring a first-class implementation of the concept of namespaces along with utilities to customize and manage them.
 
@@ -123,15 +126,37 @@ IN-NOMINE> (describe 8)
 ; No value
 ```
 
+## Compatibility with `LISP-NAMESPACE`
+
+In Nomine contains a compatibility shim for `LISP-NAMESPACE` that acts as a drop-in replacement for the original library:
+
+* Package `LISP-NAMESPACE` exports only two symbols, `DEFINE-NAMESPACE` and `CLEAR-NAMESPACE`,
+* `LISP-NAMESPACE:DEFINE-NAMESPACE` supports only the short form of In Nomine's `DEFINE-NAMESPACE`,
+* `LISP-NAMESPACE:DEFINE-NAMESPACE` sets default values for generated hash table variables - for a namespace named `FOO` these are:
+  * `*FOO-TABLE*` for a binding table,
+  * `*FOO-DOC-TABLE*` for a documentation table.
+
 ## API
 
 ### Packages
 
 #### Package `IN-NOMINE`
 
+Loaded via `(asdf:load-system :in-nomine)`.
+
 Utilities for defining additional namespaces in Common Lisp.
 
-Common Lisp is a Lisp-N, which means that it has a different namespaces for variables, functions, types, and so on. Users can also define their own namespaces, and IN-NOMINE is a toolkit for making that process easier.
+Common Lisp is a Lisp-N, which means that it has a different namespaces for variables, functions, types, and so on. Users can also define their own namespaces, and In Nomine is a toolkit for making that process easier.
+
+#### Package `LISP-NAMESPACE`
+
+Loaded via `(asdf:load-system :lisp-namespace)`.
+
+Utilities for defining additional namespaces in Common Lisp.
+
+Common Lisp is a Lisp-N, which means that it has a different namespaces for variables, functions, types, and so on. Users can also define their own namespaces, and `LISP-NAMESPACE` is a toolkit for making that process easier.
+
+Implemented via In Nomine.
 
 ### Namespace definition and management
 
@@ -157,7 +182,7 @@ Two forms of this macro are provided:
     * Type `FOO-TYPE` denoting the specified `VALUE-TYPE`,
     * Documentation methods with documentation type specialized on `(EQL 'FOO)`.
 * long form:
-  * `(DEFINE-NAMESPACE NAME &KEY NAME-TYPE VALUE-TYPE ACCESSOR CONDITION-NAME TYPE-NAME MAKUNBOUND-SYMBOL BOUNDP-SYMBOL DOCUMENTATION-TYPE ERROR-WHEN-NOT-FOUND-P ERRORP-ARG-IN-ACCESSOR-P DEFAULT-ARG-IN-ACCESSOR-P HASH-TABLE-TEST DOCUMENTATION)`
+  * `(DEFINE-NAMESPACE NAME &KEY NAME-TYPE VALUE-TYPE ACCESSOR CONDITION-NAME TYPE-NAME MAKUNBOUND-SYMBOL BOUNDP-SYMBOL DOCUMENTATION-TYPE ERROR-WHEN-NOT-FOUND-P ERRORP-ARG-IN-ACCESSOR-P DEFAULT-ARG-IN-ACCESSOR-P HASH-TABLE-TEST BINDING-TABLE-VAR DOCUMENTATION-TABLE-VAR DOCUMENTATION)`
     * `NAME` - a symbol naming the namespace,
     * `NAME-TYPE` - a type specifiers for keys bound in this namespace,
     * `VALUE-TYPE` - a type specifier for values bound in this namespace,
@@ -171,6 +196,8 @@ Two forms of this macro are provided:
     * `ERRORP-ARG-IN-ACCESSOR-P` - a boolean stating whether accessor functions should have an optional `ERRORP` argument for stating whether an unbound condition should be signaled when an attempt is made to access an unbound name,
     * `DEFAULT-ARG-IN-ACCESSOR-P` - a boolean stating whether accessor functions should have an optional `DEFAULT` argument for automatic setting of unbound values,
     * `HASH-TABLE-TEST` - a symbol naming the hash table test of the binding and documentation hash tables of the namespace,
+    * `BINDING-TABLE-VAR` - a symbol naming the variable whose value shall be the binding table of the namespace, or `NIL` if no such variable should be defined,
+    * `DOCUMENTATION-TABLE-VAR` - a symbol naming the variable whose value shall be the documentation table of the namespace, or `NIL` if no such variable should be defined,
     * `DOCUMENTATION` - documentation string for the namespace object.
 
 The consequences are undefined if a namespace is redefined in an incompatible
@@ -258,6 +285,14 @@ Returns the binding hash table, or `NIL` if no binding mechanism is defined.
 #### Function `NAMESPACE-DOCUMENTATION-TABLE`
 
 Returns the documentation hash table, or `NIL` if no documentation type is defined.
+
+#### Function `NAMESPACE-BINDING-TABLE-VAR`
+
+Returns the symbol naming the variable whose value is the binding table of the namespace, or `NIL` if no such variable is defined.
+
+#### Function `NAMESPACE-DOCUMENTATION-TABLE-VAR`
+
+Returns the symbol naming the variable whose value is the documentation table of the namespace, or `NIL` if no such variable is defined.
 
 ### Namespaces
 

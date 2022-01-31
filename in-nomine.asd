@@ -39,6 +39,7 @@
   :description "test system for in-nomine"
   :license "LLGPL"
   :depends-on (#:in-nomine
+               #:lisp-namespace
                #:alexandria
                #:uiop
                #:fiveam

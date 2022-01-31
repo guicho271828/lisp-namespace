@@ -102,6 +102,22 @@
       ,@(when documentation
           `((setf (documentation ',name 'namespace) ,documentation))))))
 
+(defun make-binding-table-var-forms (namespace)
+  (let ((name (namespace-name namespace))
+        (table-symbol (namespace-binding-table-var namespace)))
+    `(,@(when table-symbol
+          `((declaim (type hash-table ,table-symbol))
+            (defvar ,table-symbol
+              (namespace-binding-table (symbol-namespace ',name))))))))
+
+(defun make-documentation-table-var-forms (namespace)
+  (let ((name (namespace-name namespace))
+        (doc-table-symbol (namespace-documentation-table-var namespace)))
+    `(,@(when doc-table-symbol
+          `((declaim (type hash-table ,doc-table-symbol))
+            (defvar ,doc-table-symbol
+              (namespace-documentation-table (symbol-namespace ',name))))))))
+
 ;;; Reader forms
 
 (defun read-evaluated-form ()
