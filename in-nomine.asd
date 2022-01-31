@@ -22,6 +22,7 @@
                              (:file "short")
                              (:file "long")
                              (:file "macro")))
+               (:file "methods")
                (:file "describe-object")
                (:file "documentation"))
   :description "Utilities for extensible namespaces in Common Lisp."

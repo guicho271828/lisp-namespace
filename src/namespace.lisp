@@ -93,7 +93,7 @@
     (check-namespace-parameters namespace)
     namespace))
 
-;;; Tying the knot
+;;; Instantiating the metanamespace
 
 (defparameter *namespace-args*
   '(:value-type namespace
@@ -102,38 +102,18 @@
     :errorp-arg-in-accessor-p t
     :type-name nil))
 
-(defvar *namespaces*
-  (apply #'make-namespace 'namespace *namespace-args*))
+(defvar *namespaces* (apply #'make-namespace 'namespace *namespace-args*))
+
+;;; Tying the knot
+
+(setf (gethash 'namespace (namespace-binding-table *namespaces*)) *namespaces*)
+
+;;; Helper functions
 
 (defun ensure-namespace (name &rest args)
   (let ((hash-table (namespace-binding-table *namespaces*)))
     (multiple-value-bind (value foundp) (gethash name hash-table)
       (if foundp
           value
-          (apply #'make-namespace name args)))))
-
-(setf *namespaces* (apply #'ensure-namespace 'namespace *namespace-args*)
-      (gethash 'namespace (namespace-binding-table *namespaces*)) *namespaces*)
-
-;;; Methods on standard functions
-
-(defmethod documentation ((namespace namespace) (type (eql 't)))
-  (namespace-documentation namespace))
-
-(defmethod (setf documentation) (newdoc (namespace namespace) (type (eql 't)))
-  (setf (namespace-documentation namespace) newdoc))
-
-(defmethod documentation ((name symbol) (type (eql 'namespace)))
-  (namespace-documentation (symbol-namespace name)))
-
-(defmethod (setf documentation) (newdoc (name symbol) (type (eql 'namespace)))
-  (setf (namespace-documentation (symbol-namespace name)) newdoc))
-
-(defmethod print-object ((namespace namespace) stream)
-  (print-unreadable-object (namespace stream :type t)
-    (let ((hash-table (namespace-binding-table namespace)))
-      (format stream "~S ~:[(external)~;(~D binding~:*~P)~]"
-              (namespace-name namespace)
-              hash-table
-              (when hash-table
-                (hash-table-count (namespace-binding-table namespace)))))))
+          (setf (gethash name hash-table)
+                (apply #'make-namespace name args))))))
