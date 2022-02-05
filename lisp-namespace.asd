@@ -29,7 +29,6 @@
   :description "test system for lisp-namespace"
   :license "LLGPL"
   :depends-on (#:lisp-namespace
-               #:lisp-namespace
                #:alexandria
                #:uiop
                #:fiveam
