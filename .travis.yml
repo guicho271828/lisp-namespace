@@ -6,7 +6,7 @@ addons:
     packages:
       - libc6-i386
       - clisp
-      - openjdk-7-jre
+      - openjdk-8-jre
 
 env:
   global:
@@ -21,12 +21,10 @@ env:
     - LISP=cmucl
     - LISP=alisp
 
-matrix:
-  allow_failures:
-    - env: LISP=clisp
-
 install:
   - curl -L https://raw.githubusercontent.com/snmsts/roswell/release/scripts/install-for-ci.sh | sh
+  - rm -rf ~/.roswell/local-projects/in-nomine || true
+  - git clone https://github.com/phoe/in-nomine.git ~/.roswell/local-projects/in-nomine
 
 cache:
   directories:
